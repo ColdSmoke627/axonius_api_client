@@ -11,15 +11,9 @@ import requests
 
 from ..connect import Connect
 from ..constants.logs import LOG_LEVEL_API
-from ..exceptions import (
-    ApiError,
-    InvalidCredentials,
-    JsonApiError,
-    JsonInvalid,
-    ResponseNotOk,
-    UnsupportedVersion,
-    ValidationError,
-)
+from ..exceptions import (ApiError, InvalidCredentials, JsonApiError,
+                          JsonInvalid, ResponseNotOk, UnsupportedVersion,
+                          ValidationError)
 from ..logs import get_obj_log
 from ..tools import combo_dicts, json_reload, listify
 
@@ -62,17 +56,44 @@ class ApiModel:
         return self.__str__()
 
 
+def is_schema_cls(value: Optional[type] = None) -> bool:
+    """Pass."""
+    return bool(value) and issubclass(value, (DataSchema, DataSchemaJson))
+
+
+def is_model_cls(value: Optional[type] = None) -> bool:
+    """Pass."""
+    return bool(value) and issubclass(value, DataModel)
+
+
+def check_schema_cls(value: Optional[type] = None) -> type:
+    """Pass."""
+    if is_schema_cls(value):
+        assert not hasattr(value, "_get_schema_cls")
+        assert hasattr(value, "_get_model_cls")
+    return value
+
+
+def check_model_cls(value: Optional[type] = None) -> type:
+    """Pass."""
+    if is_model_cls(value):
+        assert hasattr(value, "_get_schema_cls")
+        assert not hasattr(value, "_get_model_cls")
+    return value
+
+
 @dataclasses.dataclass
 class ApiEndpoint:
     """Pass."""
 
     method: str
     path: str
+    description: str
 
-    request_schema_cls: Optional[type]
-    request_model_cls: Optional[type]
-    response_schema_cls: Optional[type]
-    response_model_cls: Optional[type]
+    request_schema_cls: type
+    request_model_cls: type
+    response_schema_cls: type
+    response_model_cls: type
 
     http_args: dict = dataclasses.field(default_factory=dict)
     http_args_required: List[str] = dataclasses.field(default_factory=list)
@@ -80,11 +101,56 @@ class ApiEndpoint:
     request_as_none: bool = False
     response_as_text: bool = False
     log_level: str = "debug"
+    name: Optional[str] = None
+    group: Optional[type] = None
+
+    def __post_init__(self):
+        """Pass."""
+        reqsch = check_schema_cls(self.request_schema_cls)
+        reqmod = check_model_cls(self.request_model_cls)
+        rspsch = check_schema_cls(self.response_schema_cls)
+        rspmod = check_model_cls(self.response_model_cls)
+
+        if is_schema_cls(reqsch):
+            check = check_model_cls(reqsch._get_model_cls())
+            if check != reqmod:
+                raise ApiError(
+                    f"request schema {reqsch}._get_model_cls() {check} != {reqmod}\n{self}"
+                )
+
+        if is_model_cls(reqmod):
+            assert not hasattr(reqmod, "_get_model_cls")
+
+            check = check_schema_cls(reqmod._get_schema_cls())
+            assert not hasattr(check, "_get_schema_cls")
+            if check != reqsch:
+                raise ApiError(
+                    f"request model {reqmod}._get_schema_cls() {check} != {reqsch}\n{self}"
+                )
+
+        if is_schema_cls(rspsch):
+            check = check_model_cls(rspsch._get_model_cls())
+            if check != rspmod:
+                raise ApiError(
+                    f"response schema {rspsch}._get_model_cls() {check} != {rspmod}\n{self}"
+                )
+
+        if is_model_cls(rspmod):
+            check = check_schema_cls(rspmod._get_schema_cls())
+            if check != rspsch:
+                raise ApiError(
+                    f"response model {rspmod}._get_schema_cls() {check} != {rspsch}\n{self}"
+                )
 
     def __str__(self):
         """Pass."""
         lines = [
-            f"ApiEndpoint Method={self.method!r}, path={self.path!r}",
+            f"{self.__class__.__name__}",
+            f"Name={self.name}",
+            f"Group={self.group}",
+            f"Method={self.method}",
+            f"Endpoint={self.path}",
+            f"Description={self.description}",
             f"Request Schema={self.request_schema_cls}",
             f"Request Model={self.request_model_cls}",
             f"Response Schema={self.response_schema_cls}",
@@ -275,7 +341,7 @@ class DataCommon:
     @classmethod
     def _load_schema(
         cls,
-        schema: marshmallow.Schema,
+        schema: Union[marshmallow.Schema, marshmallow_jsonapi.Schema],
         data: dict,
         client: Connect,
         api_endpoint: ApiEndpoint,

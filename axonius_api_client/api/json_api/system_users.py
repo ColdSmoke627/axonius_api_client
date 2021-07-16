@@ -8,7 +8,8 @@ import marshmallow
 import marshmallow_jsonapi
 
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaBool, SchemaDatetime, SchemaPassword, get_field_dc_mm
+from .custom_fields import (SchemaBool, SchemaDateTime, SchemaPassword,
+                            get_field_dc_mm)
 
 
 class SystemUserSchema(DataSchemaJson):
@@ -16,9 +17,9 @@ class SystemUserSchema(DataSchemaJson):
 
     email = marshmallow_jsonapi.fields.Str(allow_none=True)
     first_name = marshmallow_jsonapi.fields.Str()
-    last_login = SchemaDatetime()
+    last_login = SchemaDateTime()
     last_name = marshmallow_jsonapi.fields.Str()
-    last_updated = SchemaDatetime()
+    last_updated = SchemaDateTime()
     password = SchemaPassword(default="", allow_none=True)
     pic_name = marshmallow_jsonapi.fields.Str()
     role_id = marshmallow_jsonapi.fields.Str(required=True)
@@ -41,7 +42,7 @@ class SystemUserSchema(DataSchemaJson):
 class SystemUserUpdateSchema(SystemUserSchema):
     """Pass."""
 
-    last_login = SchemaDatetime(allow_none=True)
+    last_login = SchemaDateTime(allow_none=True)
 
     class Meta:
         """Pass."""
@@ -68,95 +69,10 @@ class SystemUserUpdateSchema(SystemUserSchema):
             data.pop("ignore_role_assignment_rules", None)
         return data
 
-
-@dataclasses.dataclass
-class PasswordLinkCreateRequest(DataModel):
-    """Pass."""
-
-    user_id: str
-    user_name: str
-
-
-@dataclasses.dataclass
-class PasswordLinkSendRequest(DataModel):
-    """Pass."""
-
-    email: str
-    user_id: str
-    invite: bool = False
-
-
-@dataclasses.dataclass
-class PasswordLinkSendResponse(DataModel):
-    """Pass."""
-
-    user_name: str
-
-
-@dataclasses.dataclass
-class PasswordTokenValidateRequest(DataModel):
-    """Pass."""
-
-    token: bool
-
-    def dump_request_params(self, **kwargs) -> Optional[dict]:
-        """Pass."""
-        return None
-
-
-@dataclasses.dataclass
-class PasswordTokenValidateResponse(DataModel):
-    """Pass."""
-
-    valid: bool
-
-
-@dataclasses.dataclass
-class SystemUser(DataModel):
-    """Pass."""
-
-    role_id: str
-    user_name: str
-    uuid: str
-
-    email: Optional[str] = None
-    first_name: Optional[str] = None
-    id: Optional[str] = None
-    last_login: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
-    )
-    last_name: Optional[str] = None
-    last_updated: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
-    )
-    password: Optional[Union[List[str], str]] = None
-    pic_name: Optional[str] = None
-    source: Optional[str] = None
-    ignore_role_assignment_rules: Optional[bool] = None
-
     @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+    def _get_model_cls() -> type:
         """Pass."""
-        return SystemUserSchema
-
-    @property
-    def full_name(self) -> str:
-        """Pass."""
-        return " ".join([x for x in [self.first_name, self.last_name] if x])
-
-    def __post_init__(self):
-        """Pass."""
-        if self.id is None and self.uuid is not None:
-            self.id = self.uuid
-
-    def to_dict_old(self, system_roles: List[dict]) -> dict:
-        """Pass."""
-        system_role = [x for x in system_roles if x["uuid"] == self.role_id][0]
-        obj = self.to_dict()
-        obj["role_obj"] = system_role
-        obj["role_name"] = system_role["name"]
-        obj["full_name"] = self.full_name
-        return obj
+        return SystemUserUpdate
 
 
 class SystemUserCreateSchema(DataSchemaJson):
@@ -188,6 +104,64 @@ class SystemUserCreateSchema(DataSchemaJson):
         if not data.get("password") and not data.get("auto_generated_password"):
             errors["password"] = "Must supply a password if auto_generated_password is False"
             raise marshmallow.ValidationError(errors)
+
+
+@dataclasses.dataclass
+class SystemUser(DataModel):
+    """Pass."""
+
+    role_id: str
+    user_name: str
+    uuid: str
+
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    id: Optional[str] = None
+    last_login: Optional[datetime.datetime] = get_field_dc_mm(
+        mm_field=SchemaDateTime(allow_none=True), default=None
+    )
+    last_name: Optional[str] = None
+    last_updated: Optional[datetime.datetime] = get_field_dc_mm(
+        mm_field=SchemaDateTime(allow_none=True), default=None
+    )
+    password: Optional[Union[List[str], str]] = None
+    pic_name: Optional[str] = None
+    source: Optional[str] = None
+    ignore_role_assignment_rules: Optional[bool] = None
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return SystemUserSchema
+
+    @property
+    def full_name(self) -> str:
+        """Pass."""
+        return " ".join([x for x in [self.first_name, self.last_name] if x])
+
+    def __post_init__(self):
+        """Pass."""
+        if self.id is None and self.uuid is not None:
+            self.id = self.uuid
+
+    def to_dict_old(self, system_roles: List[dict]) -> dict:
+        """Pass."""
+        system_role = [x for x in system_roles if x["uuid"] == self.role_id][0]
+        obj = self.to_dict()
+        obj["role_obj"] = system_role
+        obj["role_name"] = system_role["name"]
+        obj["full_name"] = self.full_name
+        return obj
+
+
+@dataclasses.dataclass
+class SystemUserUpdate(SystemUser):
+    """Pass."""
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return SystemUserUpdateSchema
 
 
 @dataclasses.dataclass

@@ -10,10 +10,11 @@ import marshmallow_jsonapi
 
 from ...data import BaseEnum
 from ...exceptions import ApiError
-from ...tools import coerce_bool, coerce_int, coerce_str_to_csv, dt_parse, int_days_map, json_load
+from ...tools import (coerce_bool, coerce_int, coerce_str_to_csv, dt_parse,
+                      int_days_map, json_load)
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaBool, SchemaDatetime, get_field_dc_mm
-from .generic import Deleted, StrValue, StrValueSchema
+from .custom_fields import SchemaBool, SchemaDateTime, get_field_dc_mm
+from .generic import Deleted  # , StrValue, StrValueSchema
 
 SET_BASIC = "EnforcementSetBasic"
 SETS_BASIC = List[SET_BASIC]
@@ -29,8 +30,8 @@ TASK_GEN = Generator[TASK_BOTH, None, None]
 TASK_UNION = Union[TASK_GEN, List[TASK_BOTH]]
 ACTION_TYPE = "EnforcementActionType"
 ACTION_TYPES = List[ACTION_TYPE]
-ACTION = "EnforcementAction"
-ACTIONS = List[ACTION]
+# ACTION = "EnforcementAction"
+# ACTIONS = List[ACTION]
 
 
 class ActionConditions(BaseEnum):
@@ -174,7 +175,7 @@ class EnforcementSetBasicSchema(DataSchemaJson):
     name = marshmallow_jsonapi.fields.Str()
     uuid = marshmallow_jsonapi.fields.Str()
     date_fetched = marshmallow_jsonapi.fields.Str()
-    last_updated = SchemaDatetime(allow_none=True)
+    last_updated = SchemaDateTime(allow_none=True)
     updated_by = marshmallow_jsonapi.fields.Str(allow_none=True)
     actions_main = marshmallow_jsonapi.fields.Str()
     actions_main_name = marshmallow_jsonapi.fields.Str()
@@ -214,7 +215,7 @@ class EnforcementSetSchema(DataSchemaJson):
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
     updated_by = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDatetime(allow_none=True, missing=None)
+    last_updated = SchemaDateTime(allow_none=True, missing=None)
 
     class Meta:
         """Pass."""
@@ -234,7 +235,7 @@ class EnforcementSetUpdateSchema(DataSchemaJson):
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
     uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDatetime(allow_none=True, missing=None)
+    last_updated = SchemaDateTime(allow_none=True, missing=None)
     updated_by = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
 
     class Meta:
@@ -263,7 +264,7 @@ class EnforcementSetUpdateResponseSchema(DataSchemaJson):
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
     uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDatetime(allow_none=True, missing=None)
+    last_updated = SchemaDateTime(allow_none=True, missing=None)
     updated_by = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
 
     class Meta:
@@ -274,7 +275,7 @@ class EnforcementSetUpdateResponseSchema(DataSchemaJson):
     @staticmethod
     def _get_model_cls() -> type:
         """Pass."""
-        return EnforcementSetUpdate
+        return EnforcementSetUpdateResponse
 
 
 class EnforcementSetCreateSchema(DataSchemaJson):
@@ -331,6 +332,16 @@ class EnforcementSetUpdate(EnforcementSetMixins, DataModel):
 
 
 @dataclasses.dataclass
+class EnforcementSetUpdateResponse(EnforcementSetUpdate):
+    """Pass."""
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return EnforcementSetUpdateResponseSchema
+
+
+@dataclasses.dataclass
 class EnforcementSetBasic(EnforcementSetMixins, DataModel):
     """Pass."""
 
@@ -343,7 +354,7 @@ class EnforcementSetBasic(EnforcementSetMixins, DataModel):
     triggers_period: Optional[str] = None
     triggers_view_name: Optional[str] = None
     last_updated: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     actions_main: str = marshmallow_jsonapi.fields.Str()
     triggers_last_triggered: Optional[str] = None
@@ -387,7 +398,7 @@ class EnforcementSet(EnforcementSetMixins, DataModel):
     date_fetched: Optional[str] = None
     updated_by: Optional[str] = None
     last_updated: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
 
     @property
@@ -989,8 +1000,8 @@ class EnforcementTaskBasicSchema(DataSchemaJson):
 
     uuid = marshmallow_jsonapi.fields.Str()
     date_fetched = marshmallow_jsonapi.fields.Str()
-    finished_at = SchemaDatetime()
-    started_at = SchemaDatetime()
+    finished_at = SchemaDateTime()
+    started_at = SchemaDateTime()
     task_name = marshmallow_jsonapi.fields.Str()
     enforcement = marshmallow_jsonapi.fields.Str()
     main_action = marshmallow_jsonapi.fields.Str()
@@ -1036,8 +1047,8 @@ class EnforcementTaskBasic(EnforcementTaskMixins, DataModel):
     successful_total: str
     trigger_condition: str
     trigger_view: str
-    started_at: datetime.datetime = get_field_dc_mm(mm_field=SchemaDatetime())
-    finished_at: datetime.datetime = get_field_dc_mm(mm_field=SchemaDatetime())
+    started_at: datetime.datetime = get_field_dc_mm(mm_field=SchemaDateTime())
+    finished_at: datetime.datetime = get_field_dc_mm(mm_field=SchemaDateTime())
     document_meta: Optional[dict] = dataclasses.field(default_factory=dict)
 
     # XXX add things like succes_count, total_count, failure_count
@@ -1055,9 +1066,9 @@ class EnforcementTaskSchema(DataSchemaJson):
     condition = marshmallow_jsonapi.fields.Str()
     date_fetched = marshmallow_jsonapi.fields.Str()
     enforcement = marshmallow_jsonapi.fields.Str()
-    finished = SchemaDatetime()
+    finished = SchemaDateTime()
     result = marshmallow_jsonapi.fields.Dict()
-    started = SchemaDatetime()
+    started = SchemaDateTime()
     task_name = marshmallow_jsonapi.fields.Str()
     trigger_period = marshmallow_jsonapi.fields.Str()
     trigger_view = marshmallow_jsonapi.fields.Str()
@@ -1089,8 +1100,8 @@ class EnforcementTask(EnforcementTaskMixins, DataModel):
     uuid: str
     date_fetched: str
     enforcement: str
-    started: datetime.datetime = get_field_dc_mm(mm_field=SchemaDatetime())
-    finished: datetime.datetime = get_field_dc_mm(mm_field=SchemaDatetime())
+    started: datetime.datetime = get_field_dc_mm(mm_field=SchemaDateTime())
+    finished: datetime.datetime = get_field_dc_mm(mm_field=SchemaDateTime())
     result: dict
     task_name: str
     trigger_period: str
@@ -1120,13 +1131,13 @@ class EnforcementActionTypeSchema(DataSchemaJson):
         return EnforcementActionType
 
 
-class EnforcementActionSchema(StrValueSchema):
-    """Pass."""
+# class EnforcementActionSchema(StrValueSchema):
+#     """Pass."""
 
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return EnforcementAction
+#     @staticmethod
+#     def _get_model_cls() -> type:
+#         """Pass."""
+#         return EnforcementAction
 
 
 @dataclasses.dataclass
@@ -1167,24 +1178,24 @@ class EnforcementActionType(DataModel):
         return ConfigParser(**kwargs)
 
 
-class EnforcementAction(StrValue):
-    """Pass."""
+# class EnforcementAction(StrValue):
+#     """Pass."""
 
-    id: str
+#     id: str
 
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return EnforcementActionSchema
+#     @staticmethod
+#     def _get_schema_cls() -> Optional[Type[DataSchema]]:
+#         """Pass."""
+#         return EnforcementActionSchema
 
-    @staticmethod
-    def _str_properties() -> List[str]:
-        """Pass."""
-        return [
-            "name",
-        ]
+#     @staticmethod
+#     def _str_properties() -> List[str]:
+#         """Pass."""
+#         return [
+#             "name",
+#         ]
 
-    @property
-    def name(self) -> str:
-        """Pass."""
-        return self.value
+#     @property
+#     def name(self) -> str:
+#         """Pass."""
+#         return self.value

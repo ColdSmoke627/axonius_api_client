@@ -2,7 +2,7 @@
 """Models for API requests & responses."""
 import dataclasses
 import datetime
-from typing import List, Optional, Type, Union
+from typing import Optional, Union
 
 import dataclasses_json
 import dateutil
@@ -14,14 +14,65 @@ from ...tools import coerce_bool
 DT_FMT = "%Y-%m-%dT%H:%M:%S%z"
 
 
+class SchemaBool(marshmallow_jsonapi.fields.Bool):
+    """Support parsing boolean using own coerce tools."""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        """Serialize for schema.dump()."""
+        return None if value is None and self.allow_none else coerce_bool_wrap(value)
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        """Deserialize for schema.load()."""
+        return None if value is None and self.allow_none else coerce_bool_wrap(value)
+
+
+class SchemaDateTime(marshmallow_jsonapi.fields.DateTime):
+    """Support parsing datetimes using own coerce tools."""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        """Serialize for schema.dump()."""
+        return None if value is None and self.allow_none else dump_date(value)
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        """Deserialize for schema.load()."""
+        return None if value is None and self.allow_none else load_date(value)
+
+
+class SchemaPassword(marshmallow_jsonapi.fields.Field):
+    """Support parsing password strings.
+
+    Notes:
+        This exists due to: ["unchanged"]
+    """
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        """Serialize for schema.dump()."""
+        return value
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        """Deserialize for schema.load()."""
+        return value
+
+
+def coerce_bool_wrap(value: Optional[Union[str, bool]] = None) -> bool:
+    """Pass."""
+    try:
+        return coerce_bool(value)
+    except Exception as exc:
+        raise marshmallow.ValidationError(str(exc))
+
+
 def load_date(value: Optional[Union[str, datetime.datetime]]) -> Optional[datetime.datetime]:
     """Pass."""
-    if not isinstance(value, datetime.datetime):
-        value = dateutil.parser.parse(value)
+    try:
+        if not isinstance(value, datetime.datetime):
+            value = dateutil.parser.parse(value)
 
-    if not value.tzinfo:
-        value = value.replace(tzinfo=dateutil.tz.tzutc())
-    return value
+        if not value.tzinfo:
+            value = value.replace(tzinfo=dateutil.tz.tzutc())
+        return value
+    except Exception as exc:
+        raise marshmallow.ValidationError(str(exc))
 
 
 def dump_date(value: Optional[Union[str, datetime.datetime]]) -> Optional[str]:
@@ -33,65 +84,6 @@ def dump_date(value: Optional[Union[str, datetime.datetime]]) -> Optional[str]:
         value = value.isoformat()
 
     return value
-
-
-class SchemaBool(marshmallow_jsonapi.fields.Bool):
-    """Support parsing boolean as strings/etc."""
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        if value is None and self.allow_none:
-            return None
-
-        try:
-            return coerce_bool(value)
-        except Exception as exc:
-            raise marshmallow.ValidationError(str(exc))
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value is None and self.allow_none:
-            return None
-
-        try:
-            return coerce_bool(value)
-        except Exception as exc:
-            raise marshmallow.ValidationError(str(exc))
-
-
-class SchemaDatetime(marshmallow_jsonapi.fields.DateTime):
-    """Field that deserializes multi-type input data to app-level objects."""
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value is None and self.allow_none:
-            return None
-
-        try:
-            return dump_date(value)
-        except Exception as exc:
-            raise marshmallow.ValidationError(str(exc))
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        if value is None and self.allow_none:
-            return None
-
-        try:
-            return load_date(value)
-        except Exception as exc:
-            raise marshmallow.ValidationError(str(exc))
-
-
-class SchemaPassword(marshmallow_jsonapi.fields.Field):
-    """Field that serializes to a string or an array and deserializes to a string or an array."""
-
-    """
-    This exists cuz:
-        ["unchanged"]
-    """
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        return value
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        return value
 
 
 def get_field_str_req(**kwargs):
@@ -108,6 +100,8 @@ def get_field_dc_mm(mm_field: marshmallow.fields.Field, **kwargs) -> dataclasses
     return dataclasses.field(**kwargs)
 
 
+'''
+# No longer used
 def get_field_oneof(
     choices: List[str], field: Type[marshmallow.fields.Field] = marshmallow.fields.Str, **kwargs
 ) -> marshmallow.fields.Field:
@@ -115,3 +109,4 @@ def get_field_oneof(
     kwargs["validate"] = marshmallow.validate.OneOf(choices=choices)
     kwargs.setdefault("required", True)
     return field(**kwargs)
+'''

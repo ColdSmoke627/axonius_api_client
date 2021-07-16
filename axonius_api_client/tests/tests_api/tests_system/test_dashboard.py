@@ -3,7 +3,6 @@
 import datetime
 
 from axonius_api_client.api import json_api
-from axonius_api_client.api.system.dashboard import DiscoverData, DiscoverPhase
 
 
 class DashboardBase:
@@ -13,7 +12,7 @@ class DashboardBase:
 class TestDashboardPrivate(DashboardBase):
     def test_private_lifecycle(self, api_client):
         lifecycle = api_client.dashboard._get()
-        assert isinstance(lifecycle, json_api.lifecycle.Lifecycle)
+        assert isinstance(lifecycle, json_api.dashboard.Lifecycle)
         assert lifecycle.status in ["starting", "running", "done"]
 
     def test_private_start_stop(self, api_client):
@@ -21,28 +20,28 @@ class TestDashboardPrivate(DashboardBase):
         assert isinstance(stop, str) and not stop
 
         lifecycle = api_client.dashboard._get()
-        assert isinstance(lifecycle, json_api.lifecycle.Lifecycle)
+        assert isinstance(lifecycle, json_api.dashboard.Lifecycle)
         assert lifecycle.status in ["done", "stopping"]
 
         start = api_client.dashboard._start()
         assert isinstance(start, str) and not start
 
         lifecycle = api_client.dashboard._get()
-        assert isinstance(lifecycle, json_api.lifecycle.Lifecycle)
+        assert isinstance(lifecycle, json_api.dashboard.Lifecycle)
         assert lifecycle.status in ["starting", "running"]
 
         re_stop = api_client.dashboard._stop()
         assert isinstance(re_stop, str) and not re_stop
 
         lifecycle = api_client.dashboard._get()
-        assert isinstance(lifecycle, json_api.lifecycle.Lifecycle)
+        assert isinstance(lifecycle, json_api.dashboard.Lifecycle)
         assert lifecycle.status in ["done", "stopping"]
 
 
 class TestDashboardPublic(DashboardBase):
     def test_get(self, api_client):
         data = api_client.dashboard.get()
-        assert isinstance(data, DiscoverData)
+        assert isinstance(data, json_api.dashboard.DiscoverData)
         assert isinstance(data.is_running, bool)
 
         within_minutes = data.next_run_within_minutes(value="900000")
@@ -75,7 +74,7 @@ class TestDashboardPublic(DashboardBase):
 
         assert isinstance(data.phases, list)
         for phase in data.phases:
-            assert isinstance(phase, DiscoverPhase)
+            assert isinstance(phase, json_api.dashboard.DiscoverPhase)
             assert phase.status in ["n/a", "done", "pending", "running"]
 
             assert str(phase)
@@ -113,16 +112,16 @@ class TestDashboardPublic(DashboardBase):
     def test_start_stop(self, api_client):
         if api_client.dashboard.is_running:
             stopped = api_client.dashboard.stop()
-            assert isinstance(stopped, DiscoverData)
+            assert isinstance(stopped, json_api.dashboard.DiscoverData)
             assert not stopped.is_running
             # assert not stopped["status"] == "done"
 
         started = api_client.dashboard.start()
-        assert isinstance(started, DiscoverData)
+        assert isinstance(started, json_api.dashboard.DiscoverData)
         assert started.is_running
         # assert started["status"] in ["starting", "running"]
 
         re_stopped = api_client.dashboard.stop()
-        assert isinstance(re_stopped, DiscoverData)
+        assert isinstance(re_stopped, json_api.dashboard.DiscoverData)
         assert not re_stopped.is_running
         # assert re_stopped["status"] == "done"

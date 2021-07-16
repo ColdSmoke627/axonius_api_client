@@ -2,13 +2,13 @@
 """Test suite for assets."""
 import pytest
 from axonius_api_client import Features
-from axonius_api_client.api import ApiEndpoints, json_api
+from axonius_api_client.api import json_api
 from axonius_api_client.constants.api import MAX_PAGE_SIZE
 from axonius_api_client.exceptions import ApiError, NotFoundError
 from axonius_api_client.tools import listify
 
 from ...meta import QUERIES
-from ...utils import check_asset, check_assets, cross_check_endpoint_models
+from ...utils import check_asset, check_assets
 
 
 class ModelMixinsBase:
@@ -16,32 +16,11 @@ class ModelMixinsBase:
 
 
 class AssetsPrivate:
-    @pytest.mark.parametrize(
-        "name,endpoint", [[k, v] for k, v in ApiEndpoints.assets.get_fields_dict().items()]
-    )
-    def test_json_api_models_request(self, name, endpoint):
-        cross_check_endpoint_models(
-            name=name,
-            endpoint=endpoint,
-            schema_model=endpoint.request_schema_cls,
-            data_model=endpoint.request_model_cls,
-        )
-
-    @pytest.mark.parametrize(
-        "name,endpoint", [[k, v] for k, v in ApiEndpoints.assets.get_fields_dict().items()]
-    )
-    def test_json_api_models_response(self, name, endpoint):
-        cross_check_endpoint_models(
-            name=name,
-            endpoint=endpoint,
-            schema_model=endpoint.response_schema_cls,
-            data_model=endpoint.response_model_cls,
-        )
-
     def test_private_get(self, apiobj):
         data = apiobj._get(limit=1)
         assert isinstance(data, json_api.assets.AssetsPage)
         assert "meta" in str(data)
+        assert "meta" in repr(data)
         assert isinstance(data.assets, list)
         assert len(data.assets) == 1
         assert data.asset_count_page == 1

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Parent API for working with system settings."""
 from ...exceptions import ApiError, NotFoundError
-from ...parsers.config import config_build, config_unchanged, config_unknown, parse_settings
+from ...parsers.config import (config_build, config_unchanged, config_unknown,
+                               parse_settings)
 from ...parsers.tables import tablize
+from .. import json_api
 from ..models import ApiModel
 
 
@@ -73,10 +75,7 @@ class SettingsMixins(ApiModel):
                     meta["full_config"] = settings["full_config"]
                 return meta
 
-        err = (
-            f"Sub Section Name {sub_section!r} not found in under "
-            f"Section Name {section!r} in {title}"
-        )
+        err = f"Sub Section Name {sub_section!r} not found in Section Name {section!r} in {title}"
         raise NotFoundError(tablize(value=valids, err=err))
 
     def update_section(self, section: str, check_unchanged: bool = True, **kwargs) -> dict:
@@ -161,3 +160,20 @@ class SettingsMixins(ApiModel):
         self._update(new_config=full_config)
 
         return self.get_sub_section(section=section, sub_section=sub_section)
+
+    def _get(self) -> json_api.system_settings.SystemSettings:
+        """Direct API method to get the current system settings."""
+        # api_endpoint = ApiEndpoints.system_settings.gui_get
+        api_endpoint = self.GET_ENDPOINT
+        return api_endpoint.perform_request(client=self.CLIENT)
+
+    def _update(self, new_config: dict) -> json_api.system_settings.SystemSettings:
+        """Direct API method to update the system settings.
+
+        Args:
+            new_config: new system settings to update
+        """
+        # api_endpoint = ApiEndpoints.system_settings.gui_update
+        api_endpoint = self.UPDATE_ENDPOINT
+        request_obj = api_endpoint.load_request(config=new_config)
+        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)

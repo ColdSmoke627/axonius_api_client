@@ -8,7 +8,7 @@ import marshmallow_jsonapi
 
 from ...tools import calc_gb, calc_percent
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaBool, SchemaDatetime, get_field_dc_mm
+from .custom_fields import SchemaBool, SchemaDateTime, get_field_dc_mm
 
 
 class InstanceSchema(DataSchemaJson):
@@ -22,9 +22,9 @@ class InstanceSchema(DataSchemaJson):
     hostname = marshmallow_jsonapi.fields.Str()
     ips = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
     is_master = SchemaBool()
-    last_seen = SchemaDatetime(allow_none=True)
+    last_seen = SchemaDateTime(allow_none=True)
     last_snapshot_size = marshmallow_jsonapi.fields.Number(allow_none=True)
-    last_updated = SchemaDatetime(allow_none=True)
+    last_updated = SchemaDateTime(allow_none=True)
     max_snapshots = marshmallow_jsonapi.fields.Int(allow_none=True)
     memory_free_space = marshmallow_jsonapi.fields.Number(allow_none=True)
     memory_size = marshmallow_jsonapi.fields.Number(allow_none=True)
@@ -51,6 +51,39 @@ class InstanceSchema(DataSchemaJson):
         """Pass."""
 
         type_ = "instances_schema"
+
+
+class FactoryResetRequestSchema(DataSchemaJson):
+    """Pass."""
+
+    approve_not_recoverable_action = SchemaBool(required=False, missing=False)
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return FactoryResetRequest
+
+    class Meta:
+        """Pass."""
+
+        type_ = "factory_reset_request_schema"
+
+
+class FactoryResetSchema(DataSchemaJson):
+    """Pass."""
+
+    triggered = SchemaBool(required=False, missing=False)
+    msg = marshmallow_jsonapi.fields.Str()
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return FactoryReset
+
+    class Meta:
+        """Pass."""
+
+        type_ = "factory_reset_schema"
 
 
 @dataclasses.dataclass
@@ -82,10 +115,10 @@ class Instance(DataModel):
     swap_free_space: Optional[float] = None
     swap_size: Optional[float] = None
     last_seen: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     last_updated: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     tags: dict = dataclasses.field(default_factory=dict)
 
@@ -165,22 +198,6 @@ class InstanceUpdateAttributesRequest(DataModel):
     use_as_environment_name: bool
 
 
-class FactoryResetRequestSchema(DataSchemaJson):
-    """Pass."""
-
-    approve_not_recoverable_action = SchemaBool(required=False, missing=False)
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return FactoryResetRequest
-
-    class Meta:
-        """Pass."""
-
-        type_ = "factory_reset_request_schema"
-
-
 @dataclasses.dataclass
 class FactoryResetRequest(DataModel):
     """Pass."""
@@ -191,23 +208,6 @@ class FactoryResetRequest(DataModel):
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
         return FactoryResetRequestSchema
-
-
-class FactoryResetSchema(DataSchemaJson):
-    """Pass."""
-
-    triggered = SchemaBool(required=False, missing=False)
-    msg = marshmallow_jsonapi.fields.Str()
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return FactoryReset
-
-    class Meta:
-        """Pass."""
-
-        type_ = "factory_reset_schema"
 
 
 @dataclasses.dataclass
@@ -222,7 +222,7 @@ class FactoryReset(DataModel):
         """Pass."""
         return FactoryResetSchema
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         """Pass."""
         msg = self.msg or "none"
         return f"Factory reset triggered: {self.triggered}, message: {msg}"

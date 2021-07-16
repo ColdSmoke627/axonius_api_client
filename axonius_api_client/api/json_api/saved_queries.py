@@ -7,7 +7,7 @@ from typing import List, Optional, Type
 import marshmallow_jsonapi
 
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaBool, SchemaDatetime, get_field_dc_mm
+from .custom_fields import SchemaBool, SchemaDateTime, get_field_dc_mm
 
 
 class SavedQuerySchema(DataSchemaJson):
@@ -27,7 +27,7 @@ class SavedQuerySchema(DataSchemaJson):
     query_type = marshmallow_jsonapi.fields.Str()
     tags = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
     timestamp = marshmallow_jsonapi.fields.Str(allow_none=True)
-    last_updated = SchemaDatetime(allow_none=True)
+    last_updated = SchemaDateTime(allow_none=True)
     updated_by = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
     user_id = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
     uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
@@ -41,20 +41,6 @@ class SavedQuerySchema(DataSchemaJson):
         """Pass."""
 
         type_ = "views_details_schema"
-
-
-# class SavedQueryDeleteSchema(DataSchemaJson):
-#     """Pass."""
-
-#     @staticmethod
-#     def _get_model_cls() -> type:
-#         """Pass."""
-#         return SavedQueryDelete
-
-#     class Meta:
-#         """Pass."""
-
-#         type_ = "delete_view_schema"
 
 
 class SavedQueryCreateSchema(DataSchemaJson):
@@ -92,7 +78,7 @@ class SavedQuery(DataModel):
     date_fetched: Optional[str] = None
     timestamp: Optional[str] = None
     last_updated: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     always_cached: bool = False
     asset_scope: bool = False
@@ -124,18 +110,3 @@ class SavedQueryCreate(DataModel):
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
         return SavedQueryCreateSchema
-
-
-# @dataclasses.dataclass
-# class SavedQueryDelete(DataModel):
-#     """Pass."""
-
-#     @staticmethod
-#     def _get_schema_cls() -> Optional[Type[DataSchema]]:
-#         """Pass."""
-#         return SavedQueryDeleteSchema
-
-#     # PBUG: why empty jsonapi doc in request
-#     def _dump_request(self, **kwargs) -> dict:
-#         """Pass."""
-#         return {"data": {"attributes": self.to_dict(), "type": self._get_schema_cls().Meta.type_}}

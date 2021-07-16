@@ -2,6 +2,7 @@
 """Utilities and tools."""
 import calendar
 import codecs
+import contextlib
 import copy
 import ipaddress
 import json
@@ -11,7 +12,8 @@ import platform
 import sys
 from datetime import datetime, timedelta, timezone
 from itertools import zip_longest
-from typing import Any, Callable, Iterable, Iterator, List, Optional, Tuple, Union
+from typing import (Any, Callable, Iterable, Iterator, List, Optional, Tuple,
+                    Union)
 from urllib.parse import urljoin
 
 import click
@@ -21,7 +23,8 @@ import dateutil.tz
 
 from . import INIT_DOTENV, PACKAGE_FILE, PACKAGE_ROOT, VERSION
 from .constants.api import GUI_PAGE_SIZES
-from .constants.general import DEBUG_TMPL, ERROR_TMPL, NO, OK_TMPL, URL_STARTS, WARN_TMPL, YES
+from .constants.general import (DEBUG_TMPL, ERROR_TMPL, NO, OK_TMPL,
+                                URL_STARTS, WARN_TMPL, YES)
 from .exceptions import ToolsError
 from .setup_env import find_dotenv, get_env_ax
 
@@ -74,6 +77,7 @@ def coerce_int(
     max_value: Optional[int] = None,
     min_value: Optional[int] = None,
     allow_none: bool = False,
+    fallback: Optional[int] = None,
     src: str = "",
 ) -> int:
     """Convert an object into int.
@@ -84,22 +88,28 @@ def coerce_int(
     Raises:
         :exc:`ToolsError`: if obj is not able to be converted to int
     """
+
+    def fb_or_exc(msg):
+        if isinstance(fallback, int):
+            return fallback
+        raise ToolsError(msg)
+
     if allow_none and obj is None:
         return obj
 
+    vtype = type(obj).__name__
     try:
         value = int(obj)
     except Exception:
-        vtype = type(obj).__name__
-        raise ToolsError(f"Supplied value {obj!r}{src} of type {vtype} is not an integer.")
+        return fb_or_exc(f"Supplied value {obj!r}{src} of type {vtype} is not an integer.")
 
     if isinstance(max_value, int) and value > max_value:
-        raise ToolsError(
+        return fb_or_exc(
             f"Supplied value {obj!r}{src} is greater than maximum value of {max_value}."
         )
 
     if isinstance(min_value, int) and value < min_value:
-        raise ToolsError(f"Supplied value {obj!r}{src} is less than minimum value of {min_value}.")
+        return fb_or_exc(f"Supplied value {obj!r}{src} is less than minimum value of {min_value}.")
 
     return value
 
@@ -1182,3 +1192,13 @@ def int_days_map(value: Union[str, List[Union[str, int]]], names: bool = False) 
 def is_url(value: str) -> bool:
     """Pass."""
     return isinstance(value, str) and any([value.startswith(x) for x in URL_STARTS])
+
+
+@contextlib.contextmanager
+def timer(description: str) -> None:  # pragma: no cover
+    """Timer util."""
+    start = dt_now()
+    yield
+    end = dt_now()
+    elapsed = end - start
+    echo_warn(msg=f"{description}: elapsed time: {elapsed}", tmpl_str="** TIMING {msg}")

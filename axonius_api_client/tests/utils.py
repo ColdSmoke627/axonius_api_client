@@ -8,14 +8,13 @@ import sys
 from io import StringIO
 
 import pytest
-from cachetools import TTLCache, cached
-from click.testing import CliRunner
-
 from axonius_api_client.api import Wizard
 from axonius_api_client.cli.context import Context
 from axonius_api_client.constants.fields import AGG_ADAPTER_NAME
 from axonius_api_client.exceptions import NotFoundError
 from axonius_api_client.tools import listify
+from cachetools import TTLCache, cached
+from click.testing import CliRunner
 
 IS_WINDOWS = sys.platform == "win32"
 IS_LINUX = sys.platform == "linux"
@@ -260,20 +259,19 @@ def get_key_creds(request):
     return {"key": key, "secret": secret}
 
 
-def cross_check_endpoint_models(name, endpoint, schema_model, data_model, skip=False):
+'''
+def cross_check_endpoint_models(name, endpoint, schema_model, data_model, skip=True):
     """Test utility."""
-    if schema_model is None and data_model is None:
-        if skip:
-            pytest.skip(f"schema_model or data_model is undefined in {name} {endpoint}")
-        return
-    elif schema_model is None and data_model is not None:
-        schema_model_from_data = data_model._get_schema_cls()
-        assert schema_model_from_data is None
-    elif data_model is None and schema_model is not None:
-        data_model_from_schema = schema_model._get_model_cls()
-        assert data_model_from_schema is None
-    else:
-        data_model_from_schema = schema_model._get_model_cls()
-        schema_model_from_data = data_model._get_schema_cls()
-        assert data_model_from_schema == data_model
-        assert schema_model_from_data == schema_model
+    # if all([x is None for x in [schema_model, data_model]]):
+    #     if skip:
+    #         pytest.skip(f"schema_model and data_model is undefined in {name!r} {endpoint}")
+    #     return
+
+    if isinstance(schema_model, (models.DataSchema, models.DataSchemaJson)):
+        data_from_schema = schema_model._get_model_cls()
+        assert data_from_schema == data_model, "dataclass from schema does not match endpoint"
+
+    if isinstance(data_model, models.DataModel):
+        schema_from_data = data_model._get_schema_cls()
+        assert schema_from_data == schema_model, "schema from dataclass does not match endpoint"
+'''

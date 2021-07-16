@@ -30,6 +30,66 @@ class SystemSettingsSchema(DataSchemaJson):
         type_ = "settings_schema"
 
 
+class FeatureFlagsSchema(SystemSettingsSchema):
+    """Pass."""
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return FeatureFlags
+
+
+class SystemSettingsUpdateSchema:
+    """Pass."""
+
+    config = marshmallow_jsonapi.fields.Dict(required=True)
+    configName = marshmallow_jsonapi.fields.Str(default="", missing="")
+    config_name = marshmallow_jsonapi.fields.Str(default="", missing="")
+    pluginId = marshmallow_jsonapi.fields.Str(default="", missing="")
+    prefix = marshmallow_jsonapi.fields.Str(default="", missing="")
+
+    class Meta:
+        """Pass."""
+
+        type_ = "settings_schema"
+
+
+class SystemSettingsGuiUpdateSchema(SystemSettingsUpdateSchema, DataSchemaJson):
+    """Pass."""
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return SystemSettingsGuiUpdate
+
+
+class SystemSettingsIdentityProvidersUpdateSchema(SystemSettingsUpdateSchema, DataSchemaJson):
+    """Pass."""
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return SystemSettingsIdentityProvidersUpdate
+
+
+class SystemSettingsLifecycleUpdateSchema(SystemSettingsUpdateSchema, DataSchemaJson):
+    """Pass."""
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return SystemSettingsLifecycleUpdate
+
+
+class SystemSettingsGlobalUpdateSchema(SystemSettingsUpdateSchema, DataSchemaJson):
+    """Pass."""
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return SystemSettingsGlobalUpdate
+
+
 @dataclasses.dataclass
 class SystemSettings(DataModel):
     """Pass."""
@@ -47,21 +107,6 @@ class SystemSettings(DataModel):
         return SystemSettingsSchema
 
 
-class SystemSettingsUpdateSchema(DataSchemaJson):
-    """Pass."""
-
-    config = marshmallow_jsonapi.fields.Dict(required=True)
-    configName = marshmallow_jsonapi.fields.Str(default="", missing="")
-    config_name = marshmallow_jsonapi.fields.Str(default="", missing="")
-    pluginId = marshmallow_jsonapi.fields.Str(default="", missing="")
-    prefix = marshmallow_jsonapi.fields.Str(default="", missing="")
-
-    class Meta:
-        """Pass."""
-
-        type_ = "settings_schema"
-
-
 @dataclasses.dataclass
 class SystemSettingsGuiUpdate(DataModel):
     """Pass."""
@@ -73,7 +118,7 @@ class SystemSettingsGuiUpdate(DataModel):
     @staticmethod
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
-        return SystemSettingsUpdateSchema
+        return SystemSettingsGuiUpdateSchema
 
 
 @dataclasses.dataclass
@@ -87,7 +132,7 @@ class SystemSettingsIdentityProvidersUpdate(DataModel):
     @staticmethod
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
-        return SystemSettingsUpdateSchema
+        return SystemSettingsIdentityProvidersUpdateSchema
 
 
 @dataclasses.dataclass
@@ -101,7 +146,7 @@ class SystemSettingsLifecycleUpdate(DataModel):
     @staticmethod
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
-        return SystemSettingsUpdateSchema
+        return SystemSettingsLifecycleUpdateSchema
 
 
 @dataclasses.dataclass
@@ -115,16 +160,7 @@ class SystemSettingsGlobalUpdate(DataModel):
     @staticmethod
     def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
-        return SystemSettingsUpdateSchema
-
-
-class FeatureFlagsSchema(SystemSettingsSchema):
-    """Pass."""
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return FeatureFlags
+        return SystemSettingsGlobalUpdateSchema
 
 
 @dataclasses.dataclass

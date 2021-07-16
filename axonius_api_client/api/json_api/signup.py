@@ -66,37 +66,6 @@ class SystemStatusSchema(DataSchemaJson):
         type_ = "machine_status_schema"
 
 
-@dataclasses.dataclass
-class SignupRequest(DataModel):
-    """Pass."""
-
-    company_name: str
-    contact_email: str
-    new_password: str
-    confirm_new_password: str
-    user_name: str
-    api_keys: bool = True
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return SignupRequestSchema
-
-
-@dataclasses.dataclass
-class LoginRequest(DataModel):
-    """Pass."""
-
-    user_name: str
-    password: str
-    remember_me: bool = True
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return LoginRequestSchema
-
-
 class SignupResponseSchema(DataSchemaJson):
     """Pass."""
 
@@ -144,3 +113,34 @@ class SystemStatus(DataModel):
         """Pass."""
         msg = self.msg or "none"
         return f"System status - ready: {self.is_ready}, message: {msg} (code: {self.status_code})"
+
+
+@dataclasses.dataclass
+class SignupRequest(DataModel):
+    """Pass."""
+
+    company_name: str
+    contact_email: str
+    new_password: str
+    confirm_new_password: str
+    user_name: str
+    api_keys: bool = True
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return SignupRequestSchema
+
+
+@dataclasses.dataclass
+class LoginRequest(DataModel):
+    """Pass."""
+
+    user_name: str
+    password: str
+    remember_me: bool = True
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return LoginRequestSchema

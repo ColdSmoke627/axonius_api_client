@@ -34,18 +34,6 @@ class MetadataSchema(DataSchemaJson):
         type_ = "metadata_schema"
 
 
-@dataclasses.dataclass
-class Metadata(DataModel):
-    """Pass."""
-
-    document_meta: dict = dataclasses.field(default_factory=dict)
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return MetadataSchema
-
-
 class BoolValueSchema(DataSchemaJson):
     """Pass."""
 
@@ -60,18 +48,6 @@ class BoolValueSchema(DataSchemaJson):
     def _get_model_cls() -> type:
         """Pass."""
         return BoolValue
-
-
-@dataclasses.dataclass
-class BoolValue(DataModel):
-    """Pass."""
-
-    value: bool
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return BoolValueSchema
 
 
 class IntValueSchema(DataSchemaJson):
@@ -90,18 +66,6 @@ class IntValueSchema(DataSchemaJson):
         return IntValue
 
 
-@dataclasses.dataclass
-class IntValue(DataModel):
-    """Pass."""
-
-    value: int
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return IntValueSchema
-
-
 class StrValueSchema(DataSchemaJson):
     """Pass."""
 
@@ -116,18 +80,6 @@ class StrValueSchema(DataSchemaJson):
     def _get_model_cls() -> type:
         """Pass."""
         return StrValue
-
-
-@dataclasses.dataclass
-class StrValue(DataModel):
-    """Pass."""
-
-    value: str
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return StrValueSchema
 
 
 class NameValueSchema(DataSchemaJson):
@@ -146,18 +98,6 @@ class NameValueSchema(DataSchemaJson):
         return NameValue
 
 
-@dataclasses.dataclass
-class NameValue(DataModel):
-    """Pass."""
-
-    name: str
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return NameValueSchema
-
-
 class DictValueSchema(DataSchemaJson):
     """Pass."""
 
@@ -174,18 +114,6 @@ class DictValueSchema(DataSchemaJson):
         return DictValue
 
 
-@dataclasses.dataclass
-class DictValue(DataModel):
-    """Pass."""
-
-    value: dict
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return DictValueSchema
-
-
 class DeletedSchema(DataSchemaJson):
     """Pass."""
 
@@ -200,6 +128,58 @@ class DeletedSchema(DataSchemaJson):
     def _get_model_cls() -> type:
         """Pass."""
         return Deleted
+
+
+class PrivateRequestSchema(DataSchemaJson):
+    """Pass."""
+
+    private = marshmallow_jsonapi.fields.Bool(missing=False)
+
+    class Meta:
+        """Pass."""
+
+        type_ = "private_schema"
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return PrivateRequest
+
+
+@dataclasses.dataclass
+class StrValue(DataModel):
+    """Pass."""
+
+    value: str
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return StrValueSchema
+
+
+@dataclasses.dataclass
+class NameValue(DataModel):
+    """Pass."""
+
+    name: str
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return NameValueSchema
+
+
+@dataclasses.dataclass
+class DictValue(DataModel):
+    """Pass."""
+
+    value: dict
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return DictValueSchema
 
 
 @dataclasses.dataclass
@@ -226,17 +206,37 @@ class PrivateRequest(DataModel):
         return PrivateRequestSchema
 
 
-class PrivateRequestSchema(DataSchemaJson):
+@dataclasses.dataclass
+class Metadata(DataModel):
     """Pass."""
 
-    private = marshmallow_jsonapi.fields.Bool(missing=False)
-
-    class Meta:
-        """Pass."""
-
-        type_ = "private_schema"
+    document_meta: dict = dataclasses.field(default_factory=dict)
 
     @staticmethod
-    def _get_model_cls() -> type:
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
         """Pass."""
-        return PrivateRequest
+        return MetadataSchema
+
+
+@dataclasses.dataclass
+class BoolValue(DataModel):
+    """Pass."""
+
+    value: bool
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return BoolValueSchema
+
+
+@dataclasses.dataclass
+class IntValue(DataModel):
+    """Pass."""
+
+    value: int
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return IntValueSchema

@@ -74,10 +74,10 @@ class Meta(ApiModel):
 
     def _about(self) -> dict:
         """Direct API method to get the About page."""
-        api_endpoint = ApiEndpoints.system_settings.meta_about
+        api_endpoint = ApiEndpoints.meta.about
         return api_endpoint.perform_request(client=self.CLIENT)
 
     def _historical_sizes(self) -> dict:
         """Direct API method to get the metadata about disk usage."""
-        api_endpoint = ApiEndpoints.system_settings.historical_sizes
+        api_endpoint = ApiEndpoints.meta.historical_sizes
         return api_endpoint.perform_request(client=self.CLIENT)

@@ -8,7 +8,7 @@ import marshmallow
 
 from ...tools import dt_now, dt_parse, trim_float
 from ..models import DataModel, DataSchema
-from .custom_fields import SchemaBool, SchemaDatetime, get_field_dc_mm
+from .custom_fields import SchemaBool, SchemaDateTime, get_field_dc_mm
 
 
 class RemoteSupportSchema(DataSchema):
@@ -17,7 +17,7 @@ class RemoteSupportSchema(DataSchema):
     provision = SchemaBool()
     analytics = SchemaBool()
     troubleshooting = SchemaBool()
-    timeout = SchemaDatetime(allow_none=True)
+    timeout = SchemaDateTime(allow_none=True)
     type = marshmallow.fields.Str(default="maintenance")
     _id = marshmallow.fields.Str()
 
@@ -25,6 +25,74 @@ class RemoteSupportSchema(DataSchema):
     def _get_model_cls() -> type:
         """Pass."""
         return RemoteSupport
+
+
+class UpdatePermanentRequestSchema(DataSchema):
+    """Pass."""
+
+    provision = SchemaBool()
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return UpdatePermanentRequest
+
+
+class UpdateAnalyticsRequestSchema(DataSchema):
+    """Pass."""
+
+    analytics = SchemaBool()
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return UpdateAnalyticsRequest
+
+
+class UpdateTroubleshootingRequestSchema(DataSchema):
+    """Pass."""
+
+    troubleshooting = SchemaBool()
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return UpdateTroubleshootingRequest
+
+
+class UpdateTemporaryRequestSchema(DataSchema):
+    """Pass."""
+
+    duration = marshmallow.fields.Int(validate=marshmallow.validate.Range(min=1))
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return UpdateTemporaryRequest
+
+
+@dataclasses.dataclass
+class UpdateAnalyticsRequest(DataModel):
+    """Pass."""
+
+    analytics: bool
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return UpdateAnalyticsRequestSchema
+
+
+@dataclasses.dataclass
+class UpdateTroubleshootingRequest(DataModel):
+    """Pass."""
+
+    troubleshooting: bool
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return UpdateTroubleshootingRequestSchema
 
 
 @dataclasses.dataclass
@@ -35,7 +103,7 @@ class RemoteSupport(DataModel):
     analytics: bool
     troubleshooting: bool
     timeout: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     type: str = "maintenance"
     _id: str = ""
@@ -94,89 +162,9 @@ class RemoteSupport(DataModel):
         return self.enabled and self.troubleshooting
 
     @staticmethod
-    def _get_model_cls() -> type:
+    def _get_schema_cls() -> type:
         """Pass."""
         return RemoteSupportSchema
-
-
-class UpdatePermanentRequestSchema(DataSchema):
-    """Pass."""
-
-    provision = SchemaBool()
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return UpdatePermanentRequest
-
-
-@dataclasses.dataclass
-class UpdatePermanentRequest(DataModel):
-    """Pass."""
-
-    provision: bool
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return UpdatePermanentRequestSchema
-
-
-class UpdateAnalyticsRequestSchema(DataSchema):
-    """Pass."""
-
-    analytics = SchemaBool()
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return UpdateAnalyticsRequest
-
-
-@dataclasses.dataclass
-class UpdateAnalyticsRequest(DataModel):
-    """Pass."""
-
-    analytics: bool
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return UpdateAnalyticsRequestSchema
-
-
-class UpdateTroubleshootingRequestSchema(DataSchema):
-    """Pass."""
-
-    troubleshooting = SchemaBool()
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return UpdateTroubleshootingRequest
-
-
-@dataclasses.dataclass
-class UpdateTroubleshootingRequest(DataModel):
-    """Pass."""
-
-    troubleshooting: bool
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return UpdateTroubleshootingRequestSchema
-
-
-class UpdateTemporaryRequestSchema(DataSchema):
-    """Pass."""
-
-    duration = marshmallow.fields.Int(validate=marshmallow.validate.Range(min=1))
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return UpdateTemporaryRequest
 
 
 @dataclasses.dataclass
@@ -196,3 +184,15 @@ class UpdateTemporaryResponse(DataModel):
     """Pass."""
 
     timeout: str
+
+
+@dataclasses.dataclass
+class UpdatePermanentRequest(DataModel):
+    """Pass."""
+
+    provision: bool
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return UpdatePermanentRequestSchema

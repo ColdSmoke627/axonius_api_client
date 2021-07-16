@@ -4,6 +4,7 @@ import dataclasses
 import datetime
 from typing import Any, ClassVar, List, Optional, Type
 
+import dataclasses_json
 import marshmallow
 import marshmallow_jsonapi
 
@@ -13,7 +14,8 @@ from ...exceptions import NotFoundError
 from ...parsers.config import parse_schema
 from ...tools import listify, longest_str, strip_right
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaBool, SchemaDatetime, dump_date, get_field_dc_mm
+from .custom_fields import (SchemaBool, SchemaDateTime, dump_date,
+                            get_field_dc_mm)
 from .generic import Metadata, MetadataSchema
 from .system_settings import SystemSettingsUpdateSchema
 
@@ -65,7 +67,7 @@ class AdapterSettingsSchema(MetadataSchema):
         return AdapterSettings
 
 
-class AdapterSettingsUpdateSchema(SystemSettingsUpdateSchema):
+class AdapterSettingsUpdateSchema(SystemSettingsUpdateSchema, DataSchemaJson):
     """Pass."""
 
     @staticmethod
@@ -250,7 +252,7 @@ class CnxLabelsSchema(MetadataSchema):
 
 
 @dataclasses.dataclass
-class AdapterNodeCnx(DataModel):
+class AdapterNodeCnx(dataclasses_json.DataClassJsonMixin):
     """Pass."""
 
     active: bool
@@ -264,7 +266,7 @@ class AdapterNodeCnx(DataModel):
     connection_discovery: Optional[dict] = dataclasses.field(default_factory=dict)
     date_fetched: Optional[str] = None
     last_fetch_time: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     error: Optional[str] = ""
     tunnel_id: Optional[str] = None
@@ -319,7 +321,7 @@ class AdapterNodeCnx(DataModel):
 
 
 @dataclasses.dataclass
-class AdapterClientsCount(DataModel):
+class AdapterClientsCount(dataclasses_json.DataClassJsonMixin):
     """Pass."""
 
     error_count: Optional[int] = None
@@ -341,7 +343,7 @@ class AdapterClientsCount(DataModel):
 
 
 @dataclasses.dataclass
-class AdapterNode(DataModel):
+class AdapterNode(dataclasses_json.DataClassJsonMixin):
     """Pass."""
 
     node_id: str
@@ -939,7 +941,7 @@ class CnxLabels(Metadata):
 
 
 @dataclasses.dataclass
-class Cnx(DataModel):
+class Cnx(dataclasses_json.DataClassJsonMixin):
     """Pass."""
 
     active: bool
@@ -954,7 +956,7 @@ class Cnx(DataModel):
     connection_discovery: Optional[dict] = dataclasses.field(default_factory=dict)
     date_fetched: Optional[str] = None
     last_fetch_time: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
+        mm_field=SchemaDateTime(allow_none=True), default=None
     )
     error: Optional[str] = ""
     tunnel_id: Optional[str] = None

@@ -34,20 +34,6 @@ class ModifyTagsSchema(DataSchemaJson):
         return ModifyTags
 
 
-@dataclasses.dataclass
-class ModifyTags(DataModel):
-    """Pass."""
-
-    labels: List[str] = dataclasses.field(default_factory=list)
-    entities: dict = dataclasses.field(default_factory=dict)
-    filter: Optional[str] = None
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return ModifyTagsSchema
-
-
 class AssetMixins:
     """Pass."""
 
@@ -133,6 +119,44 @@ class AssetRequestSchema(DataSchemaJson):
         """Pass."""
         data = {k: v for k, v in data.items() if v is not None}
         return data
+
+
+class CountRequestSchema(DataSchemaJson):
+    """Pass."""
+
+    use_cache_entry = SchemaBool(missing=False)
+    history = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
+    filter = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
+
+    class Meta:
+        """Pass."""
+
+        type_ = "entities_count_schema"
+
+    @staticmethod
+    def _get_model_cls() -> type:
+        """Pass."""
+        return CountRequest
+
+    @marshmallow.post_dump
+    def post_dump_process(self, data, **kwargs) -> dict:
+        """Pass."""
+        data = {k: v for k, v in data.items() if v is not None}
+        return data
+
+
+@dataclasses.dataclass
+class ModifyTags(DataModel):
+    """Pass."""
+
+    labels: List[str] = dataclasses.field(default_factory=list)
+    entities: dict = dataclasses.field(default_factory=dict)
+    filter: Optional[str] = None
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return ModifyTagsSchema
 
 
 @dataclasses.dataclass
@@ -433,30 +457,6 @@ class AssetById(DataModel):
         return cls._load_schema(
             schema=schema, data=new_data, client=client, api_endpoint=api_endpoint
         )
-
-
-class CountRequestSchema(DataSchemaJson):
-    """Pass."""
-
-    use_cache_entry = SchemaBool(missing=False)
-    history = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
-    filter = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
-
-    class Meta:
-        """Pass."""
-
-        type_ = "entities_count_schema"
-
-    @staticmethod
-    def _get_model_cls() -> type:
-        """Pass."""
-        return CountRequest
-
-    @marshmallow.post_dump
-    def post_dump_process(self, data, **kwargs) -> dict:
-        """Pass."""
-        data = {k: v for k, v in data.items() if v is not None}
-        return data
 
 
 @dataclasses.dataclass

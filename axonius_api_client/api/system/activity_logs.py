@@ -20,7 +20,8 @@ class ActivityLogs(ApiModel):
     def get(
         self, generator: bool = False, **kwargs
     ) -> Union[
-        Generator[json_api.audit_logs.AuditLog, None, None], List[json_api.audit_logs.AuditLog]
+        Generator[json_api.activity_logs.ActivityLog, None, None],
+        List[json_api.activity_logs.ActivityLog],
     ]:
         """Get activity log entries.
 
@@ -37,7 +38,7 @@ class ActivityLogs(ApiModel):
         end_date: Optional[Union[str, datetime.datetime]] = None,
         within_last_hours: Optional[int] = None,
         **kwargs,
-    ) -> Generator[json_api.audit_logs.AuditLog, None, None]:
+    ) -> Generator[json_api.activity_logs.ActivityLog, None, None]:
         """Get activity log entries.
 
         Args:
@@ -72,9 +73,9 @@ class ActivityLogs(ApiModel):
         search: str = "",
         date_from: Optional[Union[str, datetime.datetime]] = None,
         date_to: Optional[Union[str, datetime.datetime]] = None,
-    ) -> json_api.audit_logs.AuditLog:
+    ) -> json_api.activity_logs.ActivityLog:
         """Direct API method to get the activity logs."""
-        api_endpoint = ApiEndpoints.audit_logs.get
+        api_endpoint = ApiEndpoints.activity_logs.get
         request_obj = api_endpoint.load_request(
             page={"limit": limit, "offset": offset},
             search=search,

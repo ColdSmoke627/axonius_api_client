@@ -292,6 +292,10 @@ class AssetMixin(ApiModel):
         }
 
         initial_count = self.count(query=query, history_date=history_date)
+        self.LOG.info(
+            f"Received initial count of {initial_count} for history date "
+            f"{history_date} using query {query}"
+        )
 
         state = json_api.assets.AssetsPage._create_state(
             max_pages=max_pages,

@@ -150,8 +150,15 @@ class Instances(ApiModel):
         valid = "\n - " + "\n - ".join(valid)
         raise NotFoundError(f"No instance (node) named {name!r} found, valid: {valid}")
 
-    def get_by_name_id_core(self, value: Optional[str] = None, serial: bool = True) -> dict:
-        """Pass."""
+    def get_by_name_id_core(
+        self, value: Optional[str] = None, serial: bool = True
+    ) -> Union[json_api.instances.Instance, dict]:
+        """Get an instance by name or id. Gets the core instance if no name or id supplied.
+
+        Args:
+            value: id or name (or None to get core instance)
+            serial: return a dict or return a Instance dataclass
+        """
         data = None
         instances = self._get()
 
@@ -389,19 +396,6 @@ class Instances(ApiModel):
         self._update_central_core_config(enabled=data["enabled"], delete_backups=enabled)
         return self.get_core_delete_mode()
 
-    def factory_reset(
-        self, reset: bool = False
-    ) -> json_api.instances.FactoryReset:  # pragma: no cover
-        """Perform a factory reset on an instance.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            reset: actually do it... be careful!
-        """
-        return self._factory_reset(approve_not_recoverable_action=reset)
-
     def get_central_core_config(self) -> dict:
         """Get the current central core configuration.
 
@@ -414,47 +408,6 @@ class Instances(ApiModel):
         """
         data = self._get_central_core_config()
         return data.to_dict()["config"]
-
-    def restore_from_aws_s3(
-        self,
-        key_name: str,
-        bucket_name: Optional[str] = None,
-        access_key_id: Optional[str] = None,
-        secret_access_key: Optional[str] = None,
-        preshared_key: Optional[str] = None,
-        allow_re_restore: Optional[bool] = None,
-        delete_backups: Optional[bool] = None,
-    ) -> dict:  # pragma: no cover
-        """Perform a restore on a core from a file in an AWS S3 Bucket.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            key_name: Name of backup file from central core in [bucket_name] to restore to
-                this core
-            bucket_name: Name of bucket in S3 to get [key_name] from
-                (Overrides ``Global Settings > Amazon S3 Settings > Amazon S3 bucket name``)
-            access_key_id: AWS Access Key Id to use to access [bucket_name]
-                (Overrides ``Global Settings > Amazon S3 Settings > AWS Access Key Id``)
-            secret_access_key: AWS Secret Access Key to use to access [bucket_name]
-                (Overrides ``Global Settings > Amazon S3 Settings > AWS Secret Access Key``)
-            preshared_key: Password to use to decrypt [key_name]
-                (Overrides: ``Global Settings > Amazon S3 Settings > Backup encryption passphrase``)
-            allow_re_restore: Restore [key_name] even if it has already been restored
-            delete_backups: Delete [key_name] from [bucket_name] after restore has finished
-                (Overrides the current value of :meth:`get_core_delete_mode`)
-        """
-        restore_opts = {}
-        restore_opts["key_name"] = key_name
-        restore_opts["allow_re_restore"] = allow_re_restore
-        restore_opts["delete_backups"] = delete_backups
-        restore_opts["bucket_name"] = bucket_name
-        restore_opts["access_key_id"] = access_key_id
-        restore_opts["secret_access_key"] = secret_access_key
-        restore_opts["preshared_key"] = preshared_key
-        response = self._restore_aws(**restore_opts)
-        return response.to_dict()
 
     @property
     def feature_flags(self) -> json_api.system_settings.FeatureFlags:
@@ -528,7 +481,19 @@ class Instances(ApiModel):
 
         return self._get_api_keys()
 
-    def reset_api_keys(self) -> dict:
+    # UNTESTABLE
+    def factory_reset(
+        self, reset: bool = False
+    ) -> json_api.instances.FactoryReset:  # pragma: no cover
+        """Perform a factory reset on an instance.
+
+        Args:
+            reset: actually do it... be careful!
+        """
+        return self._factory_reset(approve_not_recoverable_action=reset)
+
+    # UNTESTABLE
+    def reset_api_keys(self) -> dict:  # pragma: no cover
         """Reset the API key and token."""
         if not self.CLIENT.signup.is_signed_up:
             raise ApiError("Initial signup not yet performed!")
@@ -537,40 +502,49 @@ class Instances(ApiModel):
         self.CLIENT.HTTP.HEADERS_AUTH.update(response)
         return response
 
+    # UNTESTABLE
+    def restore_from_aws_s3(
+        self,
+        key_name: str,
+        bucket_name: Optional[str] = None,
+        access_key_id: Optional[str] = None,
+        secret_access_key: Optional[str] = None,
+        preshared_key: Optional[str] = None,
+        allow_re_restore: Optional[bool] = None,
+        delete_backups: Optional[bool] = None,
+    ) -> dict:  # pragma: no cover
+        """Perform a restore on a core from a file in an AWS S3 Bucket.
+
+        Args:
+            key_name: Name of backup file from central core in [bucket_name] to restore to
+                this core
+            bucket_name: Name of bucket in S3 to get [key_name] from
+                (Overrides ``Global Settings > Amazon S3 Settings > Amazon S3 bucket name``)
+            access_key_id: AWS Access Key Id to use to access [bucket_name]
+                (Overrides ``Global Settings > Amazon S3 Settings > AWS Access Key Id``)
+            secret_access_key: AWS Secret Access Key to use to access [bucket_name]
+                (Overrides ``Global Settings > Amazon S3 Settings > AWS Secret Access Key``)
+            preshared_key: Password to use to decrypt [key_name]
+                (Overrides: ``Global Settings > Amazon S3 Settings > Backup encryption passphrase``)
+            allow_re_restore: Restore [key_name] even if it has already been restored
+            delete_backups: Delete [key_name] from [bucket_name] after restore has finished
+                (Overrides the current value of :meth:`get_core_delete_mode`)
+        """
+        restore_opts = {}
+        restore_opts["key_name"] = key_name
+        restore_opts["allow_re_restore"] = allow_re_restore
+        restore_opts["delete_backups"] = delete_backups
+        restore_opts["bucket_name"] = bucket_name
+        restore_opts["access_key_id"] = access_key_id
+        restore_opts["secret_access_key"] = secret_access_key
+        restore_opts["preshared_key"] = preshared_key
+        response = self._restore_aws(**restore_opts)
+        return response.to_dict()
+
     def _get(self) -> List[json_api.instances.Instance]:
         """Direct API method to get instances."""
         api_endpoint = ApiEndpoints.instances.get
         return api_endpoint.perform_request(client=self.CLIENT)
-
-    def _factory_reset(
-        self, approve_not_recoverable_action: bool = False
-    ) -> json_api.instances.FactoryReset:  # pragma: no cover
-        """Direct API method to do a factory reset on an instance.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            approve_not_recoverable_action: actually do it... be careful!
-        """
-        api_endpoint = ApiEndpoints.instances.factory_reset
-        request_obj = api_endpoint.load_request(
-            approve_not_recoverable_action=approve_not_recoverable_action
-        )
-        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
-
-    def _delete(self, node_id: str) -> str:  # pragma: no cover
-        """Direct API method to delete an instance.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            node_id: node id of instance
-        """
-        api_endpoint = ApiEndpoints.instances.delete
-        request_obj = api_endpoint.load_request(nodeIds=[node_id])
-        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
     def _update_attrs(
         self, node_id: str, node_name: str, hostname: str, use_as_environment_name: bool
@@ -592,20 +566,6 @@ class Instances(ApiModel):
         )
         return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
-    def _update_active(self, node_id: str, status: bool) -> str:
-        """Direct API method to update an instance.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            node_id: node id of instance
-            status: enabled or disabled an instance
-        """
-        api_endpoint = ApiEndpoints.instances.update_active
-        request_obj = api_endpoint.load_request(nodeIds=node_id, status=status)
-        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
-
     def _get_central_core_config(self) -> json_api.system_settings.SystemSettings:
         """Direct API method to get the current central core configuration."""
         api_endpoint = ApiEndpoints.central_core.settings_get
@@ -623,39 +583,6 @@ class Instances(ApiModel):
         """
         api_endpoint = ApiEndpoints.central_core.settings_update
         request_obj = api_endpoint.load_request(enabled=enabled, delete_backups=delete_backups)
-        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
-
-    def _restore_aws(
-        self,
-        key_name: str,
-        bucket_name: Optional[str] = None,
-        preshared_key: Optional[str] = None,
-        access_key_id: Optional[str] = None,
-        secret_access_key: Optional[str] = None,
-        delete_backups: Optional[bool] = None,
-        allow_re_restore: Optional[bool] = None,
-    ) -> json_api.central_core.CentralCoreRestore:  # pragma: no cover
-        """Direct API method to perform a central core restore operation.
-
-        Notes:
-            Can not run in test suite!
-
-        Args:
-            restore_type: currently only AWS supported?
-            additional_data: options specific to restore_type
-        """
-        api_endpoint = ApiEndpoints.central_core.restore_aws
-        request_obj = api_endpoint.load_request(
-            additional_data={
-                "key_name": key_name,
-                "bucket_name": bucket_name,
-                "preshared_key": preshared_key,
-                "access_key_id": access_key_id,
-                "secret_access_key": secret_access_key,
-                "delete_backups": delete_backups,
-                "allow_re_restore": allow_re_restore,
-            }
-        )
         return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
     def _feature_flags(self) -> json_api.system_settings.FeatureFlags:
@@ -722,7 +649,77 @@ class Instances(ApiModel):
         api_endpoint = ApiEndpoints.signup.get_env_name
         return api_endpoint.perform_request(client=self.CLIENT)
 
-    def _reset_api_keys(self) -> dict:
+    # UNTESTABLE
+    def _update_active(self, node_id: str, status: bool) -> str:  # pragma: no cover
+        """Direct API method to update an instance.
+
+        Args:
+            node_id: node id of instance
+            status: enable or disable an instance
+        """
+        api_endpoint = ApiEndpoints.instances.update_active
+        request_obj = api_endpoint.load_request(nodeIds=node_id, status=status)
+        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
+
+    # UNTESTABLE
+    def _restore_aws(
+        self,
+        key_name: str,
+        bucket_name: Optional[str] = None,
+        preshared_key: Optional[str] = None,
+        access_key_id: Optional[str] = None,
+        secret_access_key: Optional[str] = None,
+        delete_backups: Optional[bool] = None,
+        allow_re_restore: Optional[bool] = None,
+    ) -> json_api.central_core.CentralCoreRestore:  # pragma: no cover
+        """Direct API method to perform a central core restore operation.
+
+        Args:
+            restore_type: currently only AWS supported?
+            additional_data: options specific to restore_type
+        """
+        api_endpoint = ApiEndpoints.central_core.restore_aws
+        request_obj = api_endpoint.load_request(
+            additional_data={
+                "key_name": key_name,
+                "bucket_name": bucket_name,
+                "preshared_key": preshared_key,
+                "access_key_id": access_key_id,
+                "secret_access_key": secret_access_key,
+                "delete_backups": delete_backups,
+                "allow_re_restore": allow_re_restore,
+            }
+        )
+        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
+
+    # UNTESTABLE
+    def _reset_api_keys(self) -> dict:  # pragma: no cover
         """Reset API key and token."""
         api_endpoint = ApiEndpoints.signup.reset_api_keys
         return api_endpoint.perform_request(client=self.CLIENT)
+
+    # UNTESTABLE
+    def _factory_reset(
+        self, approve_not_recoverable_action: bool = False
+    ) -> json_api.instances.FactoryReset:  # pragma: no cover
+        """Direct API method to do a factory reset on an instance.
+
+        Args:
+            approve_not_recoverable_action: actually do it... be careful!
+        """
+        api_endpoint = ApiEndpoints.instances.factory_reset
+        request_obj = api_endpoint.load_request(
+            approve_not_recoverable_action=approve_not_recoverable_action
+        )
+        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
+
+    # UNTESTABLE
+    def _delete(self, node_id: str) -> str:  # pragma: no cover
+        """Direct API method to delete an instance.
+
+        Args:
+            node_id: node id of instance
+        """
+        api_endpoint = ApiEndpoints.instances.delete
+        request_obj = api_endpoint.load_request(nodeIds=[node_id])
+        return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)

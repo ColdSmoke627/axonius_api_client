@@ -3,6 +3,7 @@
 import dataclasses
 from typing import Optional, Type
 
+import marshmallow
 import marshmallow_jsonapi
 
 from ..models import DataModel, DataSchema, DataSchemaJson
@@ -26,20 +27,7 @@ class CentralCoreSettingsUpdateSchema(DataSchemaJson):
         return CentralCoreSettingsUpdate
 
 
-@dataclasses.dataclass
-class CentralCoreSettingsUpdate(DataModel):
-    """Pass."""
-
-    delete_backups: bool
-    enabled: bool
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return CentralCoreSettingsUpdateSchema
-
-
-class AdditionalDataAws(DataSchema):
+class AdditionalDataAws(marshmallow.Schema):
     """Pass."""
 
     key_name = marshmallow_jsonapi.fields.Str(required=True)
@@ -78,19 +66,6 @@ class CentralCoreRestoreAwsRequestSchema(DataSchemaJson):
         return CentralCoreRestoreAwsRequest
 
 
-@dataclasses.dataclass
-class CentralCoreRestoreAwsRequest(DataModel):
-    """Pass."""
-
-    additional_data: AdditionalDataAws
-    restore_type: str = "aws"
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return CentralCoreRestoreAwsRequestSchema
-
-
 class CentralCoreRestoreSchema(DataSchemaJson):
     """Pass."""
 
@@ -107,6 +82,32 @@ class CentralCoreRestoreSchema(DataSchemaJson):
     def _get_model_cls() -> type:
         """Pass."""
         return CentralCoreRestore
+
+
+@dataclasses.dataclass
+class CentralCoreSettingsUpdate(DataModel):
+    """Pass."""
+
+    delete_backups: bool
+    enabled: bool
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return CentralCoreSettingsUpdateSchema
+
+
+@dataclasses.dataclass
+class CentralCoreRestoreAwsRequest(DataModel):
+    """Pass."""
+
+    additional_data: AdditionalDataAws
+    restore_type: str = "aws"
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return CentralCoreRestoreAwsRequestSchema
 
 
 @dataclasses.dataclass

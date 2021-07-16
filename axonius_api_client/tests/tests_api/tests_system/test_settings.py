@@ -2,14 +2,13 @@
 """Test suite."""
 
 import pytest
-
 from axonius_api_client.exceptions import ApiError, NotFoundError
 
-GUI_SECTION_WITH_SUBS = "system_settings"
-GUI_SECTION_NO_SUBS = "ldap_login_settings"
-GUI_NON_SUB_SECTION = "exactSearch"
-GUI_SUB_SECTION = "timeout_settings"
-GUI_SUB_KEYS = ["disable_remember_me", "enabled", "timeout"]
+# GUI_SECTION_WITH_SUBS = "system_settings"
+# GUI_SECTION_NO_SUBS = "ldap_login_settings"
+# GUI_NON_SUB_SECTION = "exactSearch"
+# GUI_SUB_SECTION = "timeout_settings"
+# GUI_SUB_KEYS = ["disable_remember_me", "enabled", "timeout"]
 
 
 class SettingsBasePublic:
@@ -74,79 +73,100 @@ class TestSettingsGui(SettingsBasePublic):
         return api_client.settings_gui
 
     def test_get_section_full_config_true(self, apiobj):
-        result = apiobj.get_section(section=GUI_SECTION_WITH_SUBS, full_config=True)
+        sect = "system_settings"
+        result = apiobj.get_section(section=sect, full_config=True)
         assert isinstance(result, dict)
         assert "full_config" in result
 
     def test_get_sub_section_full_config_true(self, apiobj):
-        result = apiobj.get_sub_section(
-            section=GUI_SECTION_WITH_SUBS, sub_section=GUI_SUB_SECTION, full_config=True
-        )
+        sect = "system_settings"
+        sub = "timeout_settings"
+        result = apiobj.get_sub_section(section=sect, sub_section=sub, full_config=True)
         assert isinstance(result, dict)
         assert "full_config" in result
 
     def test_get_section_full_config_false(self, apiobj):
-        result = apiobj.get_section(section=GUI_SECTION_WITH_SUBS, full_config=False)
+        sect = "system_settings"
+        result = apiobj.get_section(section=sect, full_config=False)
         assert isinstance(result, dict)
         assert "full_config" not in result
 
     def test_get_sub_section_full_config_false(self, apiobj):
-        result = apiobj.get_sub_section(
-            section=GUI_SECTION_WITH_SUBS, sub_section=GUI_SUB_SECTION, full_config=False
-        )
+        sect = "system_settings"
+        sub = "timeout_settings"
+        result = apiobj.get_sub_section(section=sect, sub_section=sub, full_config=False)
         assert isinstance(result, dict)
         assert "full_config" not in result
 
-    def test_get_section_error(self, apiobj):
-        with pytest.raises(NotFoundError):
-            apiobj.get_section(section="badwolf")
+    def test_get_section_invalid(self, apiobj):
+        sect = "badwolf"
+        title = "GUI Settings"
 
-    def test_get_sub_section_error(self, apiobj):
-        with pytest.raises(NotFoundError):
-            apiobj.get_sub_section(section=GUI_SECTION_WITH_SUBS, sub_section="badwolf")
+        with pytest.raises(NotFoundError) as exc:
+            apiobj.get_section(section=sect)
+
+        assert f"Section Name {sect!r} not found in {title}" in str(exc.value)
+
+    def test_get_sub_section_invalid(self, apiobj):
+        sub = "badwolf"
+        sect = "system_settings"
+        title = "GUI Settings"
+        with pytest.raises(NotFoundError) as exc:
+            apiobj.get_sub_section(section=sect, sub_section=sub)
+
+        assert f"Sub Section Name {sub!r} not found in Section Name {sect!r} in {title}" in str(
+            exc.value
+        )
 
     def test_get_sub_section_no_subsections(self, apiobj):
-        with pytest.raises(ApiError):
-            apiobj.get_sub_section(section=GUI_SECTION_NO_SUBS, sub_section="badwolf")
+        sub = "badwolf"
+        sect = "mutual_tls_settings"
+
+        with pytest.raises(ApiError) as exc:
+            apiobj.get_sub_section(section=sect, sub_section=sub)
+
+        assert f"Section Name {sect!r} has no sub sections" in str(exc.value)
 
     def test_update_section(self, apiobj):
-        old_section = apiobj.get_section(section=GUI_SECTION_WITH_SUBS)
+        sect = "system_settings"
+        key = "exactSearch"
+
+        old_section = apiobj.get_section(section=sect)
         old_config = old_section["config"]
-        old_value = old_config[GUI_NON_SUB_SECTION]
+        old_value = old_config[key]
 
         update_value = not old_value
 
-        new_section_args = {GUI_NON_SUB_SECTION: update_value}
-        new_section = apiobj.update_section(section=GUI_SECTION_WITH_SUBS, **new_section_args)
-        new_value = new_section["config"][GUI_NON_SUB_SECTION]
+        new_section_args = {key: update_value}
+        new_section = apiobj.update_section(section=sect, **new_section_args)
+        new_value = new_section["config"][key]
         assert new_value == update_value and old_value != new_value
 
-        reset_section_args = {GUI_NON_SUB_SECTION: old_value}
-        reset_section = apiobj.update_section(section=GUI_SECTION_WITH_SUBS, **reset_section_args)
-        reset_value = reset_section["config"][GUI_NON_SUB_SECTION]
+        reset_section_args = {key: old_value}
+        reset_section = apiobj.update_section(section=sect, **reset_section_args)
+        reset_value = reset_section["config"][key]
         assert reset_value == old_value and reset_value != new_value
 
     def test_update_sub_section(self, apiobj):
-        old_section = apiobj.get_sub_section(
-            section=GUI_SECTION_WITH_SUBS, sub_section=GUI_SUB_SECTION
-        )
-        sub_key = GUI_SUB_KEYS[0]
+        sect = "system_settings"
+        sub = "timeout_settings"
+        key = "timeout"
+
+        old_section = apiobj.get_sub_section(section=sect, sub_section=sub)
         old_config = old_section["config"]
-        old_value = old_config[sub_key]
+        old_value = old_config[key]
         update_value = old_value + 1
 
-        new_section_args = {sub_key: update_value}
-        new_section = apiobj.update_sub_section(
-            section=GUI_SECTION_WITH_SUBS, sub_section=GUI_SUB_SECTION, **new_section_args
-        )
-        new_value = new_section["config"][sub_key]
+        new_section_args = {key: update_value}
+        new_section = apiobj.update_sub_section(section=sect, sub_section=sub, **new_section_args)
+        new_value = new_section["config"][key]
         assert new_value == update_value and old_value != new_value
 
-        reset_section_args = {sub_key: old_value}
+        reset_section_args = {key: old_value}
         reset_section = apiobj.update_sub_section(
-            section=GUI_SECTION_WITH_SUBS, sub_section=GUI_SUB_SECTION, **reset_section_args
+            section=sect, sub_section=sub, **reset_section_args
         )
-        reset_value = reset_section["config"][sub_key]
+        reset_value = reset_section["config"][key]
         assert reset_value == old_value and reset_value != new_value
 
 
@@ -154,6 +174,13 @@ class TestSettingsGlobal(SettingsBasePublic):
     @pytest.fixture(scope="class")
     def apiobj(self, api_client):
         return api_client.settings_global
+
+    def test_configure_destroy(self, apiobj):
+        data = apiobj.configure_destroy(enabled=True, destroy=False, reset=False)
+        config = data["config"]
+        assert config["enable_destroy"] is False
+        assert config["enable_factory_reset"] is False
+        assert config["enabled"] is True
 
 
 class TestSettingsLifecycle(SettingsBasePublic):

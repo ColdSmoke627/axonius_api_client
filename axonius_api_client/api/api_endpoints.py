@@ -4,12 +4,26 @@ import dataclasses
 
 from ..data import BaseData
 from . import json_api
-from .models import ApiEndpoint
+from .models import ApiEndpoint, is_model_cls, is_schema_cls
 
 
 @dataclasses.dataclass
 class BaseEndpoints(BaseData):
     """Pass."""
+
+    def __post_init__(self):
+        """Pass."""
+        for field in self.get_fields():
+            field.default.group = self
+            field.default.name = field.name
+
+    def __str__(self):
+        """Pass."""
+        return f"{self.__class__.__name__}: {list(self.get_fields_dict())}"
+
+    def __repr__(self):
+        """Pass."""
+        return self.__str__()
 
 
 @dataclasses.dataclass
@@ -18,6 +32,7 @@ class Assets(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="get data for an asset type with fields, query, and history date",
         path="api/V4.0/{asset_type}",
         request_schema_cls=json_api.assets.AssetRequestSchema,
         request_model_cls=json_api.assets.AssetRequest,
@@ -28,6 +43,7 @@ class Assets(BaseEndpoints):
 
     get_by_id: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all of the data for one asset of an asset type",
         path="api/V4.0/{asset_type}/{internal_axon_id}",
         request_schema_cls=None,
         request_model_cls=None,
@@ -38,6 +54,7 @@ class Assets(BaseEndpoints):
 
     count: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="get count of an asset type with query and history date",
         path="api/V4.0/{asset_type}/count",
         request_schema_cls=json_api.assets.CountRequestSchema,
         request_model_cls=json_api.assets.CountRequest,
@@ -48,6 +65,7 @@ class Assets(BaseEndpoints):
 
     fields: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the schemas for all known fields for an asset type",
         path="api/V4.0/{asset_type}/fields",
         request_schema_cls=None,
         request_model_cls=None,
@@ -57,6 +75,7 @@ class Assets(BaseEndpoints):
 
     destroy: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="delete all assets and all history for an asset type",
         path="api/V4.0/{asset_type}/destroy",
         request_schema_cls=None,
         request_model_cls=json_api.assets.DestroyRequest,
@@ -69,6 +88,7 @@ class Assets(BaseEndpoints):
 
     tags_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all tags for an asset type",
         path="api/V4.0/{asset_type}/labels",
         request_schema_cls=None,
         request_model_cls=None,
@@ -78,6 +98,7 @@ class Assets(BaseEndpoints):
 
     tags_add: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="add tags to a list of internal_axon_ids for an asset type",
         path="api/V4.0/{asset_type}/labels",
         request_schema_cls=json_api.assets.ModifyTagsSchema,
         request_model_cls=json_api.assets.ModifyTags,
@@ -87,6 +108,7 @@ class Assets(BaseEndpoints):
 
     tags_remove: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="remove tags from a list of internal_axon_ids for an asset type",
         path="api/V4.0/{asset_type}/labels",
         request_schema_cls=json_api.assets.ModifyTagsSchema,
         request_model_cls=json_api.assets.ModifyTags,
@@ -96,6 +118,7 @@ class Assets(BaseEndpoints):
 
     history_dates: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all known historical dates for an asset type",
         path="api/V4.0/dashboard/get_allowed_dates",
         request_schema_cls=None,
         request_model_cls=None,
@@ -110,6 +133,7 @@ class SavedQueries(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all saved queries for an asset type",
         path="api/V4.0/{asset_type}/views/saved",
         request_schema_cls=json_api.resources.ResourcesGetSchema,
         request_model_cls=json_api.resources.ResourcesGet,
@@ -119,6 +143,7 @@ class SavedQueries(BaseEndpoints):
 
     create: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create a saved query for an asset type",
         path="api/V4.0/{asset_type}/views",
         request_schema_cls=json_api.saved_queries.SavedQueryCreateSchema,
         request_model_cls=json_api.saved_queries.SavedQueryCreate,
@@ -128,6 +153,7 @@ class SavedQueries(BaseEndpoints):
 
     delete: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete a saved query by UUID for an asset type",
         path="api/V4.0/{asset_type}/views/view/{uuid}",
         request_schema_cls=json_api.generic.PrivateRequestSchema,
         request_model_cls=json_api.generic.PrivateRequest,
@@ -136,15 +162,6 @@ class SavedQueries(BaseEndpoints):
     )
     # PBUG: why take in a request body at all?
 
-    # delete_4_3: ApiEndpoint = ApiEndpoint(
-    #     method="delete",
-    #     path="api/V4.0/{asset_type}/views/view/{uuid}",
-    #     request_schema_cls=json_api.saved_queries.SavedQueryDeleteSchema,
-    #     request_model_cls=json_api.saved_queries.SavedQueryDelete,
-    #     response_schema_cls=json_api.generic.MetadataSchema,
-    #     response_model_cls=json_api.generic.Metadata,
-    # )
-
 
 @dataclasses.dataclass
 class Instances(BaseEndpoints):
@@ -152,6 +169,7 @@ class Instances(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all instances",
         path="api/V4.0/instances",
         request_schema_cls=None,
         request_model_cls=None,
@@ -161,6 +179,7 @@ class Instances(BaseEndpoints):
 
     delete: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete an instance",
         path="api/V4.0/instances",
         request_schema_cls=None,
         request_model_cls=json_api.instances.InstanceDeleteRequest,
@@ -174,6 +193,7 @@ class Instances(BaseEndpoints):
 
     update_attrs: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the attributes of an instance",
         path="api/V4.0/instances",
         request_schema_cls=None,
         request_model_cls=json_api.instances.InstanceUpdateAttributesRequest,
@@ -186,6 +206,7 @@ class Instances(BaseEndpoints):
 
     update_active: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="set an instance as active or inactive",
         path="api/V4.0/instances",
         request_schema_cls=None,
         request_model_cls=json_api.instances.InstanceUpdateActiveRequest,
@@ -199,6 +220,7 @@ class Instances(BaseEndpoints):
 
     factory_reset: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="reset an instance to its factory reset (destroys ALL data)",
         path="api/V4.0/factory_reset",
         request_schema_cls=json_api.instances.FactoryResetRequestSchema,
         request_model_cls=json_api.instances.FactoryResetRequest,
@@ -208,6 +230,7 @@ class Instances(BaseEndpoints):
 
     admin_script_upload_start: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="start the upload of a script file provided by Axonius",
         path="api/V4.0/settings/configuration/upload_file",
         request_schema_cls=None,
         request_model_cls=None,
@@ -218,6 +241,7 @@ class Instances(BaseEndpoints):
 
     admin_script_upload_chunk: ApiEndpoint = ApiEndpoint(
         method="patch",
+        description="continue the upload of a script file provided by Axonius",
         path="api/V4.0/settings/configuration/upload_file?patch={uuid}",
         request_schema_cls=None,
         request_model_cls=None,
@@ -228,6 +252,7 @@ class Instances(BaseEndpoints):
 
     admin_script_execute: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="execute an already uploaded script file provided by Axonius",
         path="api/V4.0/settings/configuration/execute/{uuid}",
         request_schema_cls=None,
         request_model_cls=None,
@@ -243,6 +268,7 @@ class CentralCore(BaseEndpoints):
 
     settings_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the central core system settings",
         path="api/V4.0/settings/central_core",
         request_schema_cls=None,
         request_model_cls=None,
@@ -252,6 +278,7 @@ class CentralCore(BaseEndpoints):
 
     settings_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the central core system settings",
         path="api/V4.0/settings/central_core",
         request_schema_cls=json_api.central_core.CentralCoreSettingsUpdateSchema,
         request_model_cls=json_api.central_core.CentralCoreSettingsUpdate,
@@ -261,6 +288,7 @@ class CentralCore(BaseEndpoints):
 
     restore_aws: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="Perform a central core restore from an AWS snapshot uploaded by another core",
         path="api/V4.0/settings/central_core/restore",
         request_schema_cls=json_api.central_core.CentralCoreRestoreAwsRequestSchema,
         request_model_cls=json_api.central_core.CentralCoreRestoreAwsRequest,
@@ -282,6 +310,7 @@ class SystemSettings(BaseEndpoints):
     # PBUG: update response returns config_name and pluginId, which are not returned by get
     feature_flags_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the feature flags",
         path="api/V4.0/settings/plugins/gui/FeatureFlags",
         request_schema_cls=None,
         request_model_cls=None,
@@ -291,6 +320,7 @@ class SystemSettings(BaseEndpoints):
 
     global_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the global system settings",
         path="api/V4.0/settings/plugins/core/CoreService",
         request_schema_cls=None,
         request_model_cls=None,
@@ -300,8 +330,9 @@ class SystemSettings(BaseEndpoints):
 
     global_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the global system settings",
         path="api/V4.0/settings/plugins/core/CoreService",
-        request_schema_cls=json_api.system_settings.SystemSettingsUpdateSchema,
+        request_schema_cls=json_api.system_settings.SystemSettingsGlobalUpdateSchema,
         request_model_cls=json_api.system_settings.SystemSettingsGlobalUpdate,
         response_schema_cls=json_api.system_settings.SystemSettingsSchema,
         response_model_cls=json_api.system_settings.SystemSettings,
@@ -309,6 +340,7 @@ class SystemSettings(BaseEndpoints):
 
     lifecycle_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the lifecycle system settings",
         path="api/V4.0/settings/plugins/system_scheduler/SystemSchedulerService",
         request_schema_cls=None,
         request_model_cls=None,
@@ -318,8 +350,9 @@ class SystemSettings(BaseEndpoints):
 
     lifecycle_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the lifecycle system settings",
         path="api/V4.0/settings/plugins/system_scheduler/SystemSchedulerService",
-        request_schema_cls=json_api.system_settings.SystemSettingsUpdateSchema,
+        request_schema_cls=json_api.system_settings.SystemSettingsLifecycleUpdateSchema,
         request_model_cls=json_api.system_settings.SystemSettingsLifecycleUpdate,
         response_schema_cls=json_api.system_settings.SystemSettingsSchema,
         response_model_cls=json_api.system_settings.SystemSettings,
@@ -327,6 +360,7 @@ class SystemSettings(BaseEndpoints):
 
     gui_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the GUI system settings",
         path="api/V4.0/settings/plugins/gui/GuiService",
         request_schema_cls=None,
         request_model_cls=None,
@@ -336,8 +370,9 @@ class SystemSettings(BaseEndpoints):
 
     gui_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the GUI system settings",
         path="api/V4.0/settings/plugins/gui/GuiService",
-        request_schema_cls=json_api.system_settings.SystemSettingsUpdateSchema,
+        request_schema_cls=json_api.system_settings.SystemSettingsGuiUpdateSchema,
         request_model_cls=json_api.system_settings.SystemSettingsGuiUpdate,
         response_schema_cls=json_api.system_settings.SystemSettingsSchema,
         response_model_cls=json_api.system_settings.SystemSettings,
@@ -345,6 +380,7 @@ class SystemSettings(BaseEndpoints):
 
     identity_providers_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the identity providers system settings",
         path="api/V4.0/settings/plugins/gui/IdentityProviders",
         request_schema_cls=None,
         request_model_cls=None,
@@ -354,25 +390,33 @@ class SystemSettings(BaseEndpoints):
 
     identity_providers_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the identity providers system settings",
         path="api/V4.0/settings/plugins/gui/IdentityProviders",
-        request_schema_cls=json_api.system_settings.SystemSettingsUpdateSchema,
+        request_schema_cls=json_api.system_settings.SystemSettingsIdentityProvidersUpdateSchema,
         request_model_cls=json_api.system_settings.SystemSettingsIdentityProvidersUpdate,
         response_schema_cls=json_api.system_settings.SystemSettingsSchema,
         response_model_cls=json_api.system_settings.SystemSettings,
     )
 
-    meta_about: ApiEndpoint = ApiEndpoint(
+
+@dataclasses.dataclass
+class Meta(BaseEndpoints):
+    """Pass."""
+
+    about: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the about meta info",
         path="api/V4.0/settings/meta/about",
         request_schema_cls=None,
         request_model_cls=None,
-        response_schema_cls=json_api.system_meta.SystemMetaSchema,
+        response_schema_cls=json_api.meta.AboutSchema,
         response_model_cls=dict,
     )
     # PBUG: meta/about should return no spaces/all lowercase keys
 
     historical_sizes: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the size of historical data snapshots",
         path="api/V4.0/settings/historical_sizes",
         request_schema_cls=None,
         request_model_cls=None,
@@ -388,6 +432,7 @@ class RemoteSupport(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the remote support settings",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=None,
         request_model_cls=None,
@@ -398,6 +443,7 @@ class RemoteSupport(BaseEndpoints):
 
     temporary_enable: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="enable temporary remote support",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=json_api.remote_support.UpdateTemporaryRequestSchema,
         request_model_cls=json_api.remote_support.UpdateTemporaryRequest,
@@ -409,6 +455,7 @@ class RemoteSupport(BaseEndpoints):
 
     temporary_disable: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="disable temporary remote support",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=None,
         request_model_cls=None,
@@ -420,6 +467,7 @@ class RemoteSupport(BaseEndpoints):
 
     permanent_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="enable or disable permanent remote support",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=json_api.remote_support.UpdatePermanentRequestSchema,
         request_model_cls=json_api.remote_support.UpdatePermanentRequest,
@@ -432,6 +480,7 @@ class RemoteSupport(BaseEndpoints):
 
     analytics_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="enable or disable analytics",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=json_api.remote_support.UpdateAnalyticsRequestSchema,
         request_model_cls=json_api.remote_support.UpdateAnalyticsRequest,
@@ -444,6 +493,7 @@ class RemoteSupport(BaseEndpoints):
 
     troubleshooting_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="enable or disable remote support",
         path="api/V4.0/settings/maintenance",
         request_schema_cls=json_api.remote_support.UpdateTroubleshootingRequestSchema,
         request_model_cls=json_api.remote_support.UpdateTroubleshootingRequest,
@@ -461,6 +511,7 @@ class SystemUsers(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all system users",
         path="api/V4.0/settings/users",
         request_schema_cls=json_api.resources.ResourcesGetSchema,
         request_model_cls=json_api.resources.ResourcesGet,
@@ -470,6 +521,7 @@ class SystemUsers(BaseEndpoints):
 
     create: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create a system user",
         path="api/V4.0/settings/users",
         request_schema_cls=json_api.system_users.SystemUserCreateSchema,
         request_model_cls=json_api.system_users.SystemUserCreate,
@@ -479,6 +531,7 @@ class SystemUsers(BaseEndpoints):
 
     delete: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete a system user by UUID",
         path="api/V4.0/settings/users/{uuid}",
         request_schema_cls=None,
         request_model_cls=json_api.resources.ResourceDelete,
@@ -488,9 +541,10 @@ class SystemUsers(BaseEndpoints):
 
     update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update a system user by UUID",
         path="api/V4.0/settings/users/{uuid}",
         request_schema_cls=json_api.system_users.SystemUserUpdateSchema,
-        request_model_cls=json_api.system_users.SystemUser,
+        request_model_cls=json_api.system_users.SystemUserUpdate,
         response_schema_cls=json_api.system_users.SystemUserSchema,
         response_model_cls=json_api.system_users.SystemUser,
     )
@@ -502,6 +556,7 @@ class PasswordReset(BaseEndpoints):
 
     create: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create a password reset token for a user",
         path="api/V4.0/settings/users/tokens/generate",
         request_schema_cls=None,
         request_model_cls=json_api.password_reset.CreateRequest,
@@ -514,6 +569,7 @@ class PasswordReset(BaseEndpoints):
 
     send: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="email a previously created password reset token to a user",
         path="api/V4.0/settings/users/tokens/notify",
         request_schema_cls=None,
         request_model_cls=json_api.password_reset.SendRequest,
@@ -525,6 +581,7 @@ class PasswordReset(BaseEndpoints):
 
     validate: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="validate a previously created password reset token",
         path="api/V4.0/settings/users/tokens/validate/{token}",
         request_schema_cls=None,
         request_model_cls=json_api.password_reset.ValidateRequest,
@@ -536,6 +593,7 @@ class PasswordReset(BaseEndpoints):
 
     use: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="use a previously created password reset token",
         path="api/V4.0/settings/users/tokens/reset",
         request_schema_cls=None,
         request_model_cls=json_api.password_reset.UseRequest,
@@ -554,6 +612,7 @@ class Enforcements(BaseEndpoints):
 
     get_sets: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all enforcement sets in basic format",
         path="api/V4.0/enforcements",
         request_schema_cls=json_api.resources.ResourcesGetSchema,
         request_model_cls=json_api.resources.ResourcesGet,
@@ -564,6 +623,7 @@ class Enforcements(BaseEndpoints):
 
     get_set_by_uuid: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get an enforcement set in full format by UUID",
         path="api/V4.0/enforcements/{uuid}",
         request_schema_cls=None,
         request_model_cls=None,
@@ -573,6 +633,7 @@ class Enforcements(BaseEndpoints):
 
     delete_set: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete an enforcement set by UUID",
         path="api/V4.0/enforcements",
         request_schema_cls=json_api.generic.DictValueSchema,
         request_model_cls=json_api.generic.DictValue,
@@ -582,6 +643,7 @@ class Enforcements(BaseEndpoints):
 
     create_set: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create an enforcement set",
         path="api/V4.0/enforcements",
         request_schema_cls=json_api.enforcements.EnforcementSetCreateSchema,
         request_model_cls=json_api.enforcements.EnforcementSetCreate,
@@ -615,11 +677,12 @@ class Enforcements(BaseEndpoints):
 
     update_set: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update an enforcement set by UUID",
         path="api/V4.0/enforcements/{uuid}",
         request_schema_cls=json_api.enforcements.EnforcementSetUpdateSchema,
         request_model_cls=json_api.enforcements.EnforcementSetUpdate,
         response_schema_cls=json_api.enforcements.EnforcementSetUpdateResponseSchema,
-        response_model_cls=json_api.enforcements.EnforcementSetUpdate,
+        response_model_cls=json_api.enforcements.EnforcementSetUpdateResponse,
     )
     # need to remove "id" when serializing
     # PBUG: response has actions dict that looks like:
@@ -634,6 +697,7 @@ class Enforcements(BaseEndpoints):
     """
     set_has_running_task: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the running task status of an enforcement set by name",
         path="api/V4.0/enforcements/{name}/has_running_task",
         request_schema_cls=None,
         request_model_cls=None,
@@ -644,6 +708,7 @@ class Enforcements(BaseEndpoints):
 
     run_set: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="run an enforcement set by UUID",
         path="api/V4.0/enforcements/{uuid}/trigger",
         request_schema_cls=json_api.enforcements.EnforcementSetRunSchema,
         request_model_cls=json_api.enforcements.EnforcementSetRun,
@@ -654,6 +719,7 @@ class Enforcements(BaseEndpoints):
 
     get_tasks: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all tasks of an enforcement set by enforcement set UUID in basic format",
         path="api/V4.0/enforcements/{uuid}/tasks",
         request_schema_cls=json_api.resources.ResourcesGetSchema,
         request_model_cls=json_api.resources.ResourcesGet,
@@ -664,6 +730,7 @@ class Enforcements(BaseEndpoints):
 
     get_task_by_uuid: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get a tasks of an enforcement set by task UUID in full format",
         path="api/V4.0/enforcements/tasks/{uuid}",
         request_schema_cls=None,
         request_model_cls=None,
@@ -674,6 +741,7 @@ class Enforcements(BaseEndpoints):
     # PBUG: title and category of actions stored statically in javascript for GUI
     get_action_types: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all valid action types that can be used in actions for an enforcement set",
         path="api/V4.0/enforcements/actions",
         request_schema_cls=None,
         request_model_cls=None,
@@ -688,6 +756,7 @@ class SystemRoles(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all system roles",
         path="api/V4.0/settings/roles",
         request_schema_cls=None,
         request_model_cls=None,
@@ -698,6 +767,7 @@ class SystemRoles(BaseEndpoints):
 
     create: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create a system roles",
         path="api/V4.0/settings/roles",
         request_schema_cls=json_api.system_roles.SystemRoleCreateSchema,
         request_model_cls=json_api.system_roles.SystemRoleCreate,
@@ -707,6 +777,7 @@ class SystemRoles(BaseEndpoints):
 
     delete: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete a system role by UUID",
         path="api/V4.0/settings/roles/{uuid}",
         request_schema_cls=None,
         request_model_cls=json_api.resources.ResourceDelete,
@@ -717,15 +788,17 @@ class SystemRoles(BaseEndpoints):
 
     update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update a system role by UUID",
         path="api/V4.0/settings/roles/{uuid}",
         request_schema_cls=json_api.system_roles.SystemRoleUpdateSchema,
-        request_model_cls=json_api.system_roles.SystemRole,
+        request_model_cls=json_api.system_roles.SystemRoleUpdate,
         response_schema_cls=json_api.system_roles.SystemRoleSchema,
         response_model_cls=json_api.system_roles.SystemRole,
     )
 
     perms: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the map of permissions that can be assigned to a system role",
         path="api/V4.0/labels",
         request_schema_cls=None,
         request_model_cls=None,
@@ -736,20 +809,22 @@ class SystemRoles(BaseEndpoints):
 
 
 @dataclasses.dataclass
-class Lifecycle(BaseEndpoints):
+class Dashboard(BaseEndpoints):
     """Pass."""
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the current discover lifecycle information",
         path="api/V4.0/dashboard/lifecycle",
         request_schema_cls=None,
         request_model_cls=None,
-        response_schema_cls=json_api.lifecycle.LifecycleSchema,
-        response_model_cls=json_api.lifecycle.Lifecycle,
+        response_schema_cls=json_api.dashboard.LifecycleSchema,
+        response_model_cls=json_api.dashboard.Lifecycle,
     )
 
     start: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="start a discover lifecycle",
         path="api/V4.0/settings/run_manual_discovery",
         request_schema_cls=None,
         request_model_cls=None,
@@ -761,6 +836,7 @@ class Lifecycle(BaseEndpoints):
 
     stop: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="stop a discover lifecycle",
         path="api/V4.0/settings/stop_research_phase",
         request_schema_cls=None,
         request_model_cls=None,
@@ -777,6 +853,7 @@ class Adapters(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the metadata of all adapters",
         path="api/V4.0/adapters",
         request_schema_cls=json_api.adapters.AdaptersRequestSchema,
         request_model_cls=json_api.adapters.AdaptersRequest,
@@ -788,6 +865,7 @@ class Adapters(BaseEndpoints):
 
     get_basic: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the titles of all adapters with connections",
         path="api/V4.0/adapters/list",
         request_schema_cls=None,
         request_model_cls=None,
@@ -797,6 +875,7 @@ class Adapters(BaseEndpoints):
 
     settings_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the advanced settings of an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/advanced_settings",
         request_schema_cls=None,
         request_model_cls=None,
@@ -806,6 +885,7 @@ class Adapters(BaseEndpoints):
 
     settings_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update the advanced settings of an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/{config_name}",
         request_schema_cls=json_api.adapters.AdapterSettingsUpdateSchema,
         request_model_cls=json_api.adapters.AdapterSettingsUpdate,
@@ -815,6 +895,7 @@ class Adapters(BaseEndpoints):
 
     file_upload: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="upload a file to an adapter by name running on an instance by ID",
         path="api/V4.0/adapters/{adapter_name}/{node_id}/upload_file",
         request_schema_cls=None,
         request_model_cls=None,
@@ -828,6 +909,7 @@ class Adapters(BaseEndpoints):
 
     labels_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all connection labels for all connections",
         path="api/V4.0/adapters/labels",
         request_schema_cls=None,
         request_model_cls=None,
@@ -837,6 +919,7 @@ class Adapters(BaseEndpoints):
 
     cnx_get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all connections for an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/connections",
         request_schema_cls=None,
         request_model_cls=None,
@@ -846,6 +929,7 @@ class Adapters(BaseEndpoints):
 
     cnx_create: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="create a connection for an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/connections",
         request_schema_cls=json_api.adapters.CnxCreateRequestSchema,
         request_model_cls=json_api.adapters.CnxCreateRequest,
@@ -855,6 +939,7 @@ class Adapters(BaseEndpoints):
 
     cnx_update: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="update a connection by UUID for an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/connections/{uuid}",
         request_schema_cls=json_api.adapters.CnxUpdateRequestSchema,
         request_model_cls=json_api.adapters.CnxUpdateRequest,
@@ -864,6 +949,7 @@ class Adapters(BaseEndpoints):
 
     cnx_test: ApiEndpoint = ApiEndpoint(
         method="put",
+        description="test a connection for an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/connections/test",
         request_schema_cls=json_api.adapters.CnxTestRequestSchema,
         request_model_cls=json_api.adapters.CnxTestRequest,
@@ -873,6 +959,7 @@ class Adapters(BaseEndpoints):
 
     cnx_delete: ApiEndpoint = ApiEndpoint(
         method="delete",
+        description="delete a connection by UUID for an adapter by name",
         path="api/V4.0/adapters/{adapter_name}/connections/{uuid}",
         request_schema_cls=json_api.adapters.CnxDeleteRequestSchema,
         request_model_cls=json_api.adapters.CnxDeleteRequest,
@@ -889,6 +976,7 @@ class Signup(BaseEndpoints):
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="check if initial signup has been performed or not (UNAUTH)",
         path="api/V4.0/signup",
         request_schema_cls=None,
         request_model_cls=None,
@@ -899,6 +987,7 @@ class Signup(BaseEndpoints):
 
     perform: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="perform the initial signup (UNAUTH)",
         path="api/V4.0/signup",
         request_schema_cls=json_api.signup.SignupRequestSchema,
         request_model_cls=json_api.signup.SignupRequest,
@@ -907,8 +996,9 @@ class Signup(BaseEndpoints):
         http_args={"headers_auth": False},
     )
 
-    status: ApiEndpoint = ApiEndpoint(
+    system_status: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the ready status of the core instance (UNAUTH)",
         path="api/V4.0/status",
         request_schema_cls=None,
         request_model_cls=None,
@@ -919,6 +1009,7 @@ class Signup(BaseEndpoints):
 
     login: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="perform a login with username and password",
         path="api/V4.0/login",
         request_schema_cls=json_api.signup.LoginRequestSchema,
         request_model_cls=json_api.signup.LoginRequest,
@@ -929,6 +1020,7 @@ class Signup(BaseEndpoints):
 
     get_api_keys: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the API key and API secret for current user",
         path="api/V4.0/settings/api_key",
         request_schema_cls=None,
         request_model_cls=None,
@@ -938,6 +1030,7 @@ class Signup(BaseEndpoints):
 
     reset_api_keys: ApiEndpoint = ApiEndpoint(
         method="post",
+        description="reset the API key and API secret for current user",
         path="api/V4.0/settings/reset_api_key",
         request_schema_cls=None,
         request_model_cls=None,
@@ -947,6 +1040,7 @@ class Signup(BaseEndpoints):
 
     get_env_name: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the environment name for the core instance (UNAUTH)",
         path="api/V4.0/get_environment_name",
         request_schema_cls=None,
         request_model_cls=None,
@@ -956,16 +1050,17 @@ class Signup(BaseEndpoints):
 
 
 @dataclasses.dataclass
-class AuditLogs(BaseEndpoints):
+class ActivityLogs(BaseEndpoints):
     """Pass."""
 
     get: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get all activity logs",
         path="api/V4.0/settings/audit",
-        request_schema_cls=json_api.audit_logs.AuditLogRequestSchema,
-        request_model_cls=json_api.audit_logs.AuditLogRequest,
-        response_schema_cls=json_api.audit_logs.AuditLogSchema,
-        response_model_cls=json_api.audit_logs.AuditLog,
+        request_schema_cls=json_api.activity_logs.ActivityLogRequestSchema,
+        request_model_cls=json_api.activity_logs.ActivityLogRequest,
+        response_schema_cls=json_api.activity_logs.ActivityLogSchema,
+        response_model_cls=json_api.activity_logs.ActivityLog,
     )
 
 
@@ -975,6 +1070,7 @@ class OpenAPISpec(BaseEndpoints):
 
     get_spec: ApiEndpoint = ApiEndpoint(
         method="get",
+        description="get the OpenAPI specification file in YAML format",
         path="api/open_api_yaml",
         request_schema_cls=None,
         request_model_cls=None,
@@ -985,21 +1081,45 @@ class OpenAPISpec(BaseEndpoints):
 
 
 @dataclasses.dataclass
-class ApiEndpoints(BaseEndpoints):
+class ApiEndpointGroups(BaseEndpoints):
     """Pass."""
 
-    instances = Instances
-    central_core = CentralCore
-    system_settings = SystemSettings
-    remote_support = RemoteSupport
-    system_users = SystemUsers
-    system_roles = SystemRoles
-    lifecycle = Lifecycle
-    adapters = Adapters
-    signup = Signup
-    password_reset = PasswordReset
-    audit_logs = AuditLogs
-    enforcements = Enforcements
-    saved_queries = SavedQueries
-    assets = Assets
-    openapi = OpenAPISpec
+    instances: BaseEndpoints = Instances()
+    central_core: BaseEndpoints = CentralCore()
+    system_settings: BaseEndpoints = SystemSettings()
+    remote_support: BaseEndpoints = RemoteSupport()
+    system_users: BaseEndpoints = SystemUsers()
+    system_roles: BaseEndpoints = SystemRoles()
+    dashboard: BaseEndpoints = Dashboard()
+    adapters: BaseEndpoints = Adapters()
+    signup: BaseEndpoints = Signup()
+    password_reset: BaseEndpoints = PasswordReset()
+    activity_logs: BaseEndpoints = ActivityLogs()
+    enforcements: BaseEndpoints = Enforcements()
+    saved_queries: BaseEndpoints = SavedQueries()
+    assets: BaseEndpoints = Assets()
+    openapi: BaseEndpoints = OpenAPISpec()
+    meta: BaseEndpoints = Meta()
+
+    @classmethod
+    def get_data_models_used(cls) -> dict:
+        """Pass."""
+        ret = []
+        for grp_name, grp in cls.get_fields_dict().items():
+            for ep_name, ep in grp.get_fields_dict().items():
+                items = [ep.request_model_cls, ep.response_model_cls]
+                ret += [x for x in items if x not in ret and is_model_cls(x)]
+        return ret
+
+    @classmethod
+    def get_data_schemas_used(cls) -> dict:
+        """Pass."""
+        ret = []
+        for grp_name, grp in cls.get_fields_dict().items():
+            for ep_name, ep in grp.get_fields_dict().items():
+                items = [ep.request_schema_cls, ep.response_schema_cls]
+                ret += [x for x in items if x not in ret and is_schema_cls(x)]
+        return ret
+
+
+ApiEndpoints = ApiEndpointGroups()

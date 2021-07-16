@@ -6,7 +6,7 @@ import marshmallow_jsonapi
 from ..models import DataSchemaJson
 
 
-class SystemMetaSchema(DataSchemaJson):
+class AboutSchema(DataSchemaJson):
     """Pass."""
 
     api_client_version = marshmallow_jsonapi.fields.Str()

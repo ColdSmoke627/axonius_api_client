@@ -32,7 +32,7 @@ class Signup(ApiModel):
     @property
     def system_status(self) -> json_api.signup.SystemStatus:
         """Get the status of the Axonius instance (started, ready, loading containers, ...)."""
-        return self._status()
+        return self._system_status()
 
     def get_api_keys(self, user_name: str, password: str) -> dict:
         """Get the API key and token using user name and password credentials.
@@ -41,12 +41,13 @@ class Signup(ApiModel):
             user_name: axonius username
             password: password for user_name
         """
-        if not self.is_signed_up:
-            raise ApiError("Initial signup not yet performed!")
+        # UNTESTABLE
+        if self.is_signed_up:  # pragma: no cover
+            login = self._login("admin", "admin")
+            bearer_token = login.document_meta["access_token"]
+            return self._get_api_keys(bearer_token=bearer_token)
 
-        login = self._login("admin", "admin")
-        bearer_token = login.document_meta["access_token"]
-        return self._get_api_keys(bearer_token=bearer_token)
+        raise ApiError("Initial signup not yet performed!")
 
     def reset_api_keys(self, user_name: str, password: str) -> dict:
         """Reset the API key and token using user name and password credentials.
@@ -55,14 +56,14 @@ class Signup(ApiModel):
             user_name: axonius username
             password: password for user_name
         """
-        if not self.is_signed_up:
-            raise ApiError("Initial signup not yet performed!")
-
-        login = self._login("admin", "admin")
-        bearer_token = login.document_meta["access_token"]
-        response = self._reset_api_keys(bearer_token=bearer_token)
-        self.CLIENT.HTTP.HEADERS_AUTH.update(response)
-        return response
+        # UNTESTABLE
+        if self.is_signed_up:  # pragma: no cover
+            login = self._login("admin", "admin")
+            bearer_token = login.document_meta["access_token"]
+            response = self._reset_api_keys(bearer_token=bearer_token)
+            self.CLIENT.HTTP.HEADERS_AUTH.update(response)
+            return response
+        raise ApiError("Initial signup not yet performed!")
 
     def signup(self, password: str, company_name: str, contact_email: str) -> dict:
         """Perform the initial signup and get the API key and API secret of admin user.
@@ -80,13 +81,14 @@ class Signup(ApiModel):
             company_name: name of company
             contact_email: email address of company contact
         """
-        if self.is_signed_up:
-            raise ApiError("Initial signup already performed!")
+        # UNTESTABLE
+        if not self.is_signed_up:  # pragma: no cover
+            response = self._perform(
+                password=password, company_name=company_name, contact_email=contact_email
+            )
+            return response.to_dict()
 
-        response = self._perform(
-            password=password, company_name=company_name, contact_email=contact_email
-        )
-        return response.to_dict()
+        raise ApiError("Initial signup already performed!")
 
     def validate_password_reset_token(self, token: str) -> bool:
         """Validate that a password reset token is valid."""
@@ -113,15 +115,14 @@ class Signup(ApiModel):
             name of user whose password was reset
         """
         token = token_parse(token)
-        if not self.validate_password_reset_token(token=token):
-            raise ApiError(f"Password reset token is not valid: {token}")
+        if self.validate_password_reset_token(token=token):
+            data = self._token_use(token=token, password=password)
+            return data
+        raise ApiError(f"Password reset token is not valid: {token}")
 
-        data = self._token_use(token=token, password=password)
-        return data
-
-    def _status(self) -> json_api.signup.SystemStatus:
+    def _system_status(self) -> json_api.signup.SystemStatus:
         """Direct API method to get the status of the overall system."""
-        api_endpoint = ApiEndpoints.signup.status
+        api_endpoint = ApiEndpoints.signup.system_status
         return api_endpoint.perform_request(client=self.CLIENT)
 
     def _get(self) -> json_api.generic.BoolValue:
@@ -150,9 +151,10 @@ class Signup(ApiModel):
         request_obj = api_endpoint.load_request(token=token, password=password)
         return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
+    # UNTESTABLE
     def _perform(
         self, password: str, company_name: str, contact_email: str
-    ) -> json_api.signup.SignupResponse:
+    ) -> json_api.signup.SignupResponse:  # pragma: no cover
         """Direct API method to do the initial signup.
 
         Args:
@@ -171,7 +173,8 @@ class Signup(ApiModel):
         )
         return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
-    def _login(self, user_name: str, password: str, remember_me: bool = False):
+    # UNTESTABLE
+    def _login(self, user_name: str, password: str, remember_me: bool = False):  # pragma: no cover
         """Direct API method to perform a login with username and password and get auth tokens.
 
         Args:
@@ -187,14 +190,16 @@ class Signup(ApiModel):
         )
         return api_endpoint.perform_request(client=self.CLIENT, request_obj=request_obj)
 
-    def _get_api_keys(self, bearer_token: str) -> dict:
+    # UNTESTABLE
+    def _get_api_keys(self, bearer_token: str) -> dict:  # pragma: no cover
         """Get API key and token using a bearer token."""
         headers = {"authorization": f"Bearer {bearer_token}"}
         http_args = {"headers": headers, "headers_auth": False}
         api_endpoint = ApiEndpoints.signup.get_api_keys
         return api_endpoint.perform_request(client=self.CLIENT, http_args=http_args)
 
-    def _reset_api_keys(self, bearer_token: str) -> dict:
+    # UNTESTABLE
+    def _reset_api_keys(self, bearer_token: str) -> dict:  # pragma: no cover
         """Reset API key and token using a bearer token."""
         headers = {"authorization": f"Bearer {bearer_token}"}
         http_args = {"headers": headers, "headers_auth": False}

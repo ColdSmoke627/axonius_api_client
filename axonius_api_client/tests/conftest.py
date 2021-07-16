@@ -3,7 +3,6 @@
 import os
 
 import pytest
-
 from axonius_api_client.api import json_api
 from axonius_api_client.connect import Connect
 from axonius_api_client.constants.adapters import CSV_ADAPTER
@@ -86,6 +85,8 @@ def csv_file_path(api_client):
 @pytest.fixture()
 def new_csv_cnx(api_client, csv_file_path):
     """Pass."""
+    api_client.HTTP.HISTORY = []
+    api_client.HTTP.SAVE_HISTORY = True
     config = {
         "user_id": "badwolf temp",
         "file_path": csv_file_path,

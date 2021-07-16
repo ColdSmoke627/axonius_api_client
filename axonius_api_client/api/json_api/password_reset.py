@@ -37,7 +37,7 @@ class ValidateRequest(DataModel):
 
     token: str
 
-    def dump_request_params(self, **kwargs) -> Optional[dict]:
+    def _dump_request_params(self, **kwargs) -> Optional[dict]:
         """Pass."""
         return None
 

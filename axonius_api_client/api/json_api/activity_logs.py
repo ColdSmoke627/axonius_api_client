@@ -10,15 +10,15 @@ import marshmallow_jsonapi
 from ...exceptions import ApiError
 from ...tools import coerce_int_float, dt_now, dt_parse, listify, trim_float
 from ..models import DataModel, DataSchema, DataSchemaJson
-from .custom_fields import SchemaDatetime, get_field_dc_mm
+from .custom_fields import SchemaDateTime, get_field_dc_mm
 from .resources import ResourcesGet, ResourcesGetSchema
 
 
-class AuditLogRequestSchema(ResourcesGetSchema):
+class ActivityLogRequestSchema(ResourcesGetSchema):
     """Pass."""
 
-    date_from = SchemaDatetime(allow_none=True)
-    date_to = SchemaDatetime(allow_none=True)
+    date_from = SchemaDateTime(allow_none=True)
+    date_to = SchemaDateTime(allow_none=True)
 
     class Meta:
         """Pass."""
@@ -28,32 +28,15 @@ class AuditLogRequestSchema(ResourcesGetSchema):
     @staticmethod
     def _get_model_cls() -> type:
         """Pass."""
-        return AuditLogRequest
+        return ActivityLogRequest
 
 
-@dataclasses.dataclass
-class AuditLogRequest(ResourcesGet):
-    """Pass."""
-
-    date_from: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
-    )
-    date_to: Optional[datetime.datetime] = get_field_dc_mm(
-        mm_field=SchemaDatetime(allow_none=True), default=None
-    )
-
-    @staticmethod
-    def _get_schema_cls() -> Optional[Type[DataSchema]]:
-        """Pass."""
-        return AuditLogRequestSchema
-
-
-class AuditLogSchema(DataSchemaJson):
+class ActivityLogSchema(DataSchemaJson):
     """Pass."""
 
     action = marshmallow_jsonapi.fields.Str()
     category = marshmallow_jsonapi.fields.Str()
-    date = SchemaDatetime()
+    date = SchemaDateTime()
     message = marshmallow_jsonapi.fields.Str()
     type = marshmallow_jsonapi.fields.Str()
     user = marshmallow_jsonapi.fields.Str()
@@ -66,19 +49,41 @@ class AuditLogSchema(DataSchemaJson):
     @staticmethod
     def _get_model_cls() -> type:
         """Pass."""
-        return AuditLog
+        return ActivityLog
 
 
 @dataclasses.dataclass
-class AuditLog(DataModel):
+class ActivityLogRequest(ResourcesGet):
+    """Pass."""
+
+    date_from: Optional[datetime.datetime] = get_field_dc_mm(
+        mm_field=SchemaDateTime(allow_none=True), default=None
+    )
+    date_to: Optional[datetime.datetime] = get_field_dc_mm(
+        mm_field=SchemaDateTime(allow_none=True), default=None
+    )
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return ActivityLogRequestSchema
+
+
+@dataclasses.dataclass
+class ActivityLog(DataModel):
     """Pass."""
 
     action: str
     category: str
-    date: datetime.datetime = get_field_dc_mm(mm_field=SchemaDatetime())
+    date: datetime.datetime = get_field_dc_mm(mm_field=SchemaDateTime())
     message: str
     type: str
     user: str
+
+    @staticmethod
+    def _get_schema_cls() -> Optional[Type[DataSchema]]:
+        """Pass."""
+        return ActivityLogSchema
 
     @staticmethod
     def _search_properties() -> List[str]:

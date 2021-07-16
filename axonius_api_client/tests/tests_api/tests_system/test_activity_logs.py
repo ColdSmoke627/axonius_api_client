@@ -4,7 +4,6 @@
 import datetime
 
 import pytest
-
 from axonius_api_client.api import json_api
 from axonius_api_client.exceptions import ApiError
 
@@ -18,7 +17,7 @@ class TestActivityLogsPrivate(ActivityLogsBase):
         data = api_client.activity_logs._get()
         assert isinstance(data, list)
         for row in data:
-            assert isinstance(row, json_api.audit_logs.AuditLog)
+            assert isinstance(row, json_api.activity_logs.ActivityLog)
 
 
 class TestActivityLogsPublic(ActivityLogsBase):
@@ -26,7 +25,7 @@ class TestActivityLogsPublic(ActivityLogsBase):
         data = api_client.activity_logs.get()
         assert isinstance(data, list)
         for row in data:
-            assert isinstance(row, json_api.audit_logs.AuditLog)
+            assert isinstance(row, json_api.activity_logs.ActivityLog)
             assert str(row)
             assert repr(row)
             assert isinstance(row.action, str)
@@ -47,7 +46,7 @@ class TestActivityLogsPublic(ActivityLogsBase):
         data = api_client.activity_logs.get(within_last_hours=12)
         assert isinstance(data, list)
         for row in data:
-            assert row.hours_ago <= 12
+            assert row.hours_ago <= 13
 
         data = api_client.activity_logs.get(within_last_hours=-1)
         assert isinstance(data, list)

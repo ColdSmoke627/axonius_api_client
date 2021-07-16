@@ -117,10 +117,6 @@ test_last:
 		--exitfirst \
 		--last-failed \
 		--pdb \
-		--cov-config=.coveragerc \
-		--cov-report xml \
-		--cov-report=html:cov_html \
-		--cov=$(PACKAGE) \
 		$(PACKAGE)/tests
 
 test_last_log:

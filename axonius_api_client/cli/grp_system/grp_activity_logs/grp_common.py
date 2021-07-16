@@ -3,7 +3,7 @@
 import csv
 import io
 
-from ....api.json_api.audit_logs import AuditLog
+from ....api.json_api.activity_logs import ActivityLog
 from ....tools import json_dump
 from ...context import click
 
@@ -43,7 +43,7 @@ def handle_export(ctx, data, export_format, **kwargs):
 
     if export_format == "csv":
         rows = [x.to_dict() for x in data]
-        columns = AuditLog._search_properties()
+        columns = ActivityLog._search_properties()
         stream = io.StringIO()
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writerow(dict(zip(columns, columns)))
