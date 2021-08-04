@@ -134,6 +134,7 @@ class Features(BaseData):
         version_product_min="4.4",
         version_client_added="4.10.6",
         product_ticket="AX-13595",
+        version_empty=True,
         description="""
 - Adds ability to get aggregated raw data in API library via:
 client.devices.get(fields=['agg:raw_data'])
