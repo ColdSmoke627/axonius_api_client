@@ -137,7 +137,9 @@ class SystemUser(DataModel):
     @property
     def full_name(self) -> str:
         """Pass."""
-        return " ".join([x for x in [self.first_name, self.last_name] if x])
+        first_name = getattr(self, "first_name", None)
+        last_name = getattr(self, "last_name", None)
+        return " ".join([x for x in [first_name, last_name] if x])
 
     def __post_init__(self):
         """Pass."""
