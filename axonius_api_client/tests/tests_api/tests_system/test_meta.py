@@ -50,8 +50,12 @@ class SystemMetaBase:
         iversion = data.pop("Installed Version")
         assert isinstance(iversion, str)
 
-        customer_id = data.pop("Customer ID", None)
-        assert isinstance(customer_id, (str, type(None)))
+        customer_id = data.pop("Customer Id", "")
+        assert isinstance(customer_id, str)
+
+        expiry = data.pop("Contract Expiry Date", "")
+        assert isinstance(expiry, str)
+
         assert not data
 
 
