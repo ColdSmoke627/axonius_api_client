@@ -348,8 +348,10 @@ class DataCommon:
         **kwargs,
     ) -> DataTypes:
         """Pass."""
+        # print(f"_load_schema schema {schema}")
         try:
             kwargs["loaded"] = loaded = schema.load(data, unknown=marshmallow.INCLUDE)
+            # print(f"_load_schema loaded {loaded}")
         except marshmallow.ValidationError as exc:
             raise ValidationError(
                 schema=schema, exc=exc, api_endpoint=api_endpoint, obj=cls, data=data
@@ -453,9 +455,10 @@ class DataModel(dataclasses_json.DataClassJsonMixin, DataCommon):
     def _load_request(cls, api_endpoint: ApiEndpoint = None, client: Connect = None, **kwargs):
         """Pass."""
         schema = cls.schema()
-        return cls._load_schema(
-            schema=schema, data=kwargs, client=client, api_endpoint=api_endpoint
-        )
+        # print(f"_load_request schema {schema}")
+        obj = cls._load_schema(schema=schema, data=kwargs, client=client, api_endpoint=api_endpoint)
+        # print(f"_load_request obj {obj}")
+        return obj
 
     def _dump_request(
         self,

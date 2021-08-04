@@ -14,23 +14,27 @@ class SavedQuerySchema(DataSchemaJson):
     """Pass."""
 
     name = marshmallow_jsonapi.fields.Str(required=True)
-    always_cached = SchemaBool(default=False, missing=False)
-    asset_scope = marshmallow_jsonapi.fields.Bool(default=False, missing=False)
-    private = marshmallow_jsonapi.fields.Bool(default=False, missing=False)
-    description = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
+    always_cached = SchemaBool(load_default=False, dump_default=False)
+    asset_scope = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
+    private = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
+    description = marshmallow_jsonapi.fields.Str(load_default="", dump_default="", allow_none=True)
     view = marshmallow_jsonapi.fields.Dict()
     tags = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
-    predefined = marshmallow_jsonapi.fields.Bool(default=False, missing=False)
-    date_fetched = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
+    predefined = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
+    date_fetched = marshmallow_jsonapi.fields.Str(
+        allow_none=True, load_default=None, dump_default=None
+    )
     is_asset_scope_query_ready = SchemaBool()
     is_referenced = SchemaBool()
     query_type = marshmallow_jsonapi.fields.Str()
     tags = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
     timestamp = marshmallow_jsonapi.fields.Str(allow_none=True)
     last_updated = SchemaDateTime(allow_none=True)
-    updated_by = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    user_id = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
+    updated_by = marshmallow_jsonapi.fields.Str(
+        allow_none=True, load_default=None, dump_default=None
+    )
+    user_id = marshmallow_jsonapi.fields.Str(allow_none=True, load_default=None, dump_default=None)
+    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, load_default=None, dump_default=None)
 
     @staticmethod
     def _get_model_cls() -> type:
@@ -48,9 +52,9 @@ class SavedQueryCreateSchema(DataSchemaJson):
 
     name = marshmallow_jsonapi.fields.Str(required=True)
     view = marshmallow_jsonapi.fields.Dict()
-    description = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
-    always_cached = SchemaBool(default=False, missing=False)
-    private = marshmallow_jsonapi.fields.Bool(default=False, missing=False)
+    description = marshmallow_jsonapi.fields.Str(load_default="", dump_default="", allow_none=True)
+    always_cached = SchemaBool(load_default=False, dump_default=False)
+    private = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
     tags = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
 
     @staticmethod

@@ -14,10 +14,10 @@ class SystemSettingsSchema(DataSchemaJson):
     """Pass."""
 
     config = marshmallow_jsonapi.fields.Dict(required=True)
-    configName = marshmallow_jsonapi.fields.Str(default="", missing="")
-    config_name = marshmallow_jsonapi.fields.Str(default="", missing="")
-    pluginId = marshmallow_jsonapi.fields.Str(default="", missing="")
-    prefix = marshmallow_jsonapi.fields.Str(default="", missing="")
+    configName = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    config_name = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    pluginId = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    prefix = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
 
     @staticmethod
     def _get_model_cls() -> type:
@@ -43,10 +43,10 @@ class SystemSettingsUpdateSchema:
     """Pass."""
 
     config = marshmallow_jsonapi.fields.Dict(required=True)
-    configName = marshmallow_jsonapi.fields.Str(default="", missing="")
-    config_name = marshmallow_jsonapi.fields.Str(default="", missing="")
-    pluginId = marshmallow_jsonapi.fields.Str(default="", missing="")
-    prefix = marshmallow_jsonapi.fields.Str(default="", missing="")
+    configName = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    config_name = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    pluginId = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    prefix = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
 
     class Meta:
         """Pass."""

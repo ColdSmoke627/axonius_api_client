@@ -18,7 +18,7 @@ class RemoteSupportSchema(DataSchema):
     analytics = SchemaBool()
     troubleshooting = SchemaBool()
     timeout = SchemaDateTime(allow_none=True)
-    type = marshmallow.fields.Str(default="maintenance")
+    type = marshmallow.fields.Str(load_default="maintenance", dump_default="maintenance")
     _id = marshmallow.fields.Str()
 
     @staticmethod

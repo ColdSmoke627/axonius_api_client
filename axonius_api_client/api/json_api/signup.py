@@ -17,7 +17,7 @@ class SignupRequestSchema(DataSchemaJson):
     confirm_new_password = get_field_str_req()
     contact_email = marshmallow_jsonapi.fields.Email(required=True)
     user_name = get_field_str_req()
-    api_keys = marshmallow_jsonapi.fields.Bool(missing=True)
+    api_keys = marshmallow_jsonapi.fields.Bool(load_default=True, dump_default=True)
 
     class Meta:
         """Pass."""
@@ -35,7 +35,7 @@ class LoginRequestSchema(DataSchemaJson):
 
     user_name = get_field_str_req()
     password = get_field_str_req()
-    remember_me = marshmallow_jsonapi.fields.Bool(missing=False)
+    remember_me = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
 
     class Meta:
         """Pass."""

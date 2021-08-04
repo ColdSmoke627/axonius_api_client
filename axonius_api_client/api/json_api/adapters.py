@@ -29,7 +29,7 @@ class AdaptersRequestSchema(DataSchemaJson):
     """Pass."""
 
     filter = marshmallow_jsonapi.fields.Str(allow_none=True)
-    get_clients = SchemaBool(missing=True)
+    get_clients = SchemaBool(load_default=True, dump_default=True)
 
     @staticmethod
     def _get_model_cls() -> type:
@@ -89,16 +89,22 @@ class CnxCreateRequestSchema(DataSchemaJson):
     """Pass."""
 
     connection = marshmallow_jsonapi.fields.Dict(required=True)  # config of connection
-    connection_label = marshmallow_jsonapi.fields.Str(required=False, missing="", allow_none=True)
+    connection_label = marshmallow_jsonapi.fields.Str(
+        required=False, load_default="", dump_default="", allow_none=True
+    )
     instance = marshmallow_jsonapi.fields.Str(required=True)  # instance ID
-    active = SchemaBool(required=False, missing=True)  # set as active or inactive
-    save_and_fetch = SchemaBool(required=False, missing=True)  # perform a fetch after saving
+    active = SchemaBool(
+        required=False, load_default=True, dump_default=True
+    )  # set as active or inactive
+    save_and_fetch = SchemaBool(
+        required=False, load_default=True, dump_default=True
+    )  # perform a fetch after saving
     connection_discovery = marshmallow_jsonapi.fields.Dict(
-        required=False, missing=None, allow_none=True
+        required=False, load_default=None, dump_default=None, allow_none=True
     )  # connection specific discovery scheduling
     instance_name = marshmallow_jsonapi.fields.Str(required=True)
     # PBUG: why is this even a thing? can we not rely on instance id in 'instance'?
-    is_instances_mode = SchemaBool(required=False, missing=False)
+    is_instances_mode = SchemaBool(required=False, load_default=False, dump_default=False)
     # PBUG: why is this even a thing? can we not rely on instance id in 'instance'?
 
     @staticmethod
@@ -148,9 +154,11 @@ class CnxTestRequestSchema(DataSchemaJson):
 class CnxUpdateRequestSchema(CnxCreateRequestSchema):
     """Pass."""
 
-    instance_prev = marshmallow_jsonapi.fields.Str(required=False, missing=None, allow_none=True)
+    instance_prev = marshmallow_jsonapi.fields.Str(
+        required=False, load_default=None, dump_default=None, allow_none=True
+    )
     instance_prev_name = marshmallow_jsonapi.fields.Str(
-        required=False, missing=None, allow_none=True
+        required=False, load_default=None, dump_default=None, allow_none=True
     )
     # PBUG: why is this even a thing? can we not rely on instance id in 'instance_prev'?
 
@@ -205,8 +213,8 @@ class CnxModifyResponseSchema(DataSchemaJson):
 class CnxDeleteRequestSchema(DataSchemaJson):
     """Pass."""
 
-    is_instances_mode = SchemaBool(missing=False)
-    delete_entities = SchemaBool(missing=False)
+    is_instances_mode = SchemaBool(load_default=False, dump_default=False)
+    delete_entities = SchemaBool(load_default=False, dump_default=False)
     instance = marshmallow_jsonapi.fields.Str()
     instance_name = marshmallow_jsonapi.fields.Str()
 

@@ -21,7 +21,7 @@ class ModifyTagsSchema(DataSchemaJson):
 
     entities = marshmallow_jsonapi.fields.Dict()
     labels = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Str())
-    filter = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
+    filter = marshmallow_jsonapi.fields.Str(load_default="", dump_default="", allow_none=True)
 
     class Meta:
         """Pass."""
@@ -86,21 +86,27 @@ class AssetMixins:
 class AssetRequestSchema(DataSchemaJson):
     """Pass."""
 
-    always_cached_query = SchemaBool(missing=False)
-    use_cache_entry = SchemaBool(missing=False)
-    include_details = SchemaBool(missing=False)
-    include_notes = SchemaBool(missing=False)
-    get_metadata = SchemaBool(missing=True)
-    use_cursor = SchemaBool(missing=True)
+    always_cached_query = SchemaBool(load_default=False, dump_default=False)
+    use_cache_entry = SchemaBool(load_default=False, dump_default=False)
+    include_details = SchemaBool(load_default=False, dump_default=False)
+    include_notes = SchemaBool(load_default=False, dump_default=False)
+    get_metadata = SchemaBool(load_default=True, dump_default=True)
+    use_cursor = SchemaBool(load_default=True, dump_default=True)
 
-    history = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
-    filter = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
-    cursor_id = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
-    sort = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
+    history = marshmallow_jsonapi.fields.Str(load_default=None, dump_default=None, allow_none=True)
+    filter = marshmallow_jsonapi.fields.Str(load_default="", dump_default="", allow_none=True)
+    cursor_id = marshmallow_jsonapi.fields.Str(
+        load_default=None, dump_default=None, allow_none=True
+    )
+    sort = marshmallow_jsonapi.fields.Str(load_default=None, dump_default=None, allow_none=True)
 
-    excluded_adapters = marshmallow_jsonapi.fields.Dict(missing={}, allow_none=True)
-    field_filters = marshmallow_jsonapi.fields.Dict(missing={}, allow_none=True)
-    fields = marshmallow_jsonapi.fields.Dict(missing={}, allow_none=True)
+    excluded_adapters = marshmallow_jsonapi.fields.Dict(
+        load_default={}, dump_default={}, allow_none=True
+    )
+    field_filters = marshmallow_jsonapi.fields.Dict(
+        load_default={}, dump_default={}, allow_none=True
+    )
+    fields = marshmallow_jsonapi.fields.Dict(load_default={}, dump_default={}, allow_none=True)
 
     page = marshmallow_jsonapi.fields.Nested(PaginationSchema)
 
@@ -124,9 +130,9 @@ class AssetRequestSchema(DataSchemaJson):
 class CountRequestSchema(DataSchemaJson):
     """Pass."""
 
-    use_cache_entry = SchemaBool(missing=False)
-    history = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
-    filter = marshmallow_jsonapi.fields.Str(default="", missing="", allow_none=True)
+    use_cache_entry = SchemaBool(load_default=False, dump_default=False)
+    history = marshmallow_jsonapi.fields.Str(load_default=None, dump_default=None, allow_none=True)
+    filter = marshmallow_jsonapi.fields.Str(load_default="", dump_default="", allow_none=True)
 
     class Meta:
         """Pass."""

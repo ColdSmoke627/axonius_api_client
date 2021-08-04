@@ -133,7 +133,7 @@ class DeletedSchema(DataSchemaJson):
 class PrivateRequestSchema(DataSchemaJson):
     """Pass."""
 
-    private = marshmallow_jsonapi.fields.Bool(missing=False)
+    private = marshmallow_jsonapi.fields.Bool(load_default=False, dump_default=False)
 
     class Meta:
         """Pass."""

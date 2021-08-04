@@ -31,14 +31,24 @@ class AdditionalDataAws(marshmallow.Schema):
     """Pass."""
 
     key_name = marshmallow_jsonapi.fields.Str(required=True)
-    bucket_name = marshmallow_jsonapi.fields.Str(required=False, allow_none=True, default=None)
-    preshared_key = marshmallow_jsonapi.fields.Str(required=False, allow_none=True, default=None)
-    access_key_id = marshmallow_jsonapi.fields.Str(required=False, allow_none=True, default=None)
-    secret_access_key = marshmallow_jsonapi.fields.Str(
-        required=False, allow_none=True, default=None
+    bucket_name = marshmallow_jsonapi.fields.Str(
+        required=False, allow_none=True, load_default=None, dump_default=None
     )
-    delete_backups = SchemaBool(required=False, allow_none=True, default=None)
-    allow_re_restore = SchemaBool(required=False, allow_none=True, default=None)
+    preshared_key = marshmallow_jsonapi.fields.Str(
+        required=False, allow_none=True, load_default=None, dump_default=None
+    )
+    access_key_id = marshmallow_jsonapi.fields.Str(
+        required=False, allow_none=True, load_default=None, dump_default=None
+    )
+    secret_access_key = marshmallow_jsonapi.fields.Str(
+        required=False, allow_none=True, load_default=None, dump_default=None
+    )
+    delete_backups = SchemaBool(
+        required=False, allow_none=True, load_default=None, dump_default=None
+    )
+    allow_re_restore = SchemaBool(
+        required=False, allow_none=True, load_default=None, dump_default=None
+    )
 
 
 class AdditionalDataAwsSchema(marshmallow_jsonapi.fields.Nested):
@@ -52,7 +62,7 @@ class AdditionalDataAwsSchema(marshmallow_jsonapi.fields.Nested):
 class CentralCoreRestoreAwsRequestSchema(DataSchemaJson):
     """Pass."""
 
-    restore_type = marshmallow_jsonapi.fields.Str(default="aws")
+    restore_type = marshmallow_jsonapi.fields.Str(load_default="aws", dump_default="aws")
     additional_data = AdditionalDataAwsSchema()
 
     class Meta:

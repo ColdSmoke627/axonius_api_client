@@ -56,7 +56,9 @@ class InstanceSchema(DataSchemaJson):
 class FactoryResetRequestSchema(DataSchemaJson):
     """Pass."""
 
-    approve_not_recoverable_action = SchemaBool(required=False, missing=False)
+    approve_not_recoverable_action = SchemaBool(
+        required=False, dump_default=False, load_default=False
+    )
 
     @staticmethod
     def _get_model_cls() -> type:
@@ -72,7 +74,7 @@ class FactoryResetRequestSchema(DataSchemaJson):
 class FactoryResetSchema(DataSchemaJson):
     """Pass."""
 
-    triggered = SchemaBool(required=False, missing=False)
+    triggered = SchemaBool(required=False, dump_default=False, load_default=False)
     msg = marshmallow_jsonapi.fields.Str()
 
     @staticmethod

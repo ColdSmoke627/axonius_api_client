@@ -214,8 +214,10 @@ class EnforcementSetSchema(DataSchemaJson):
     date_fetched = marshmallow_jsonapi.fields.Str()
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
-    updated_by = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDateTime(allow_none=True, missing=None)
+    updated_by = marshmallow_jsonapi.fields.Str(
+        allow_none=True, load_default=None, dump_default=None
+    )
+    last_updated = SchemaDateTime(allow_none=True, load_default=None, dump_default=None)
 
     class Meta:
         """Pass."""
@@ -234,9 +236,11 @@ class EnforcementSetUpdateSchema(DataSchemaJson):
     name = marshmallow_jsonapi.fields.Str()
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
-    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDateTime(allow_none=True, missing=None)
-    updated_by = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
+    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, dump_default=None, load_default=None)
+    last_updated = SchemaDateTime(allow_none=True, dump_default=None, load_default=None)
+    updated_by = marshmallow_jsonapi.fields.Str(
+        dump_default=None, load_default=None, allow_none=True
+    )
 
     class Meta:
         """Pass."""
@@ -263,9 +267,11 @@ class EnforcementSetUpdateResponseSchema(DataSchemaJson):
     name = marshmallow_jsonapi.fields.Str()
     actions = marshmallow_jsonapi.fields.Dict()
     triggers = marshmallow_jsonapi.fields.List(marshmallow_jsonapi.fields.Dict())
-    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, missing=None)
-    last_updated = SchemaDateTime(allow_none=True, missing=None)
-    updated_by = marshmallow_jsonapi.fields.Str(missing=None, allow_none=True)
+    uuid = marshmallow_jsonapi.fields.Str(allow_none=True, dump_default=None, load_default=None)
+    last_updated = SchemaDateTime(allow_none=True, dump_default=None, load_default=None)
+    updated_by = marshmallow_jsonapi.fields.Str(
+        dump_default=None, load_default=None, allow_none=True
+    )
 
     class Meta:
         """Pass."""
@@ -299,8 +305,8 @@ class EnforcementSetCreateSchema(DataSchemaJson):
 class EnforcementSetRunSchema(DataSchemaJson):
     """Pass."""
 
-    ec_page_run = SchemaBool(missing=False)
-    use_conditions = SchemaBool(missing=False)
+    ec_page_run = SchemaBool(dump_default=False, load_default=False)
+    use_conditions = SchemaBool(dump_default=False, load_default=False)
 
     class Meta:
         """Pass."""

@@ -16,8 +16,8 @@ from .custom_fields import SchemaBool, get_field_dc_mm
 class PaginationSchema(marshmallow.Schema):
     """Pass."""
 
-    offset = marshmallow_jsonapi.fields.Integer(default=0, missing=0)
-    limit = marshmallow_jsonapi.fields.Integer(default=140, missing=140)
+    offset = marshmallow_jsonapi.fields.Integer(load_default=0, dump_default=0)
+    limit = marshmallow_jsonapi.fields.Integer(load_default=140, dump_default=140)
 
 
 class ResourcesGetSchema(DataSchemaJson):
@@ -25,9 +25,9 @@ class ResourcesGetSchema(DataSchemaJson):
 
     sort = marshmallow_jsonapi.fields.Str()
     page = marshmallow_jsonapi.fields.Nested(PaginationSchema)
-    search = marshmallow_jsonapi.fields.Str(default="", missing="")
-    get_metadata = SchemaBool(missing=True)
-    filter = marshmallow_jsonapi.fields.Str(default="", missing="")
+    search = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
+    get_metadata = SchemaBool(dump_default=True)
+    filter = marshmallow_jsonapi.fields.Str(load_default="", dump_default="")
 
     @staticmethod
     def _get_model_cls() -> type:

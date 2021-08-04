@@ -32,12 +32,12 @@ class SystemRoleSchema(DataSchemaJson):
     uuid = marshmallow_jsonapi.fields.Str(required=True)
     name = marshmallow_jsonapi.fields.Str(required=True)
     permissions = marshmallow_jsonapi.fields.Dict()
-    predefined = SchemaBool(default=False)
+    predefined = SchemaBool(load_default=False, dump_default=False)
     last_updated = SchemaDateTime(allow_none=True)
     asset_scope_restriction = marshmallow_jsonapi.fields.Dict(required=False)
 
     # NEW_IN: 05/31/21 cortex/develop
-    users_count = marshmallow_jsonapi.fields.Int(required=False, missing=0)
+    users_count = marshmallow_jsonapi.fields.Int(required=False, load_default=0, dump_default=0)
 
     @staticmethod
     def _get_model_cls() -> type:
